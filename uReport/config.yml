@@ -1,7 +1,9 @@
 # NOTE! It is not recommended to change settings manually in the file!
 # A better way is to change the values via the in-game menu, where you will also find descriptions of all the options!
+
 # if permission has more than one option (e.g. history, clear and remove)
 # you can use ".*" after to allow all options! e.g. "ur.history.*"
+
 cfg:
     auto_update_uReport: true
     update_notif: true
