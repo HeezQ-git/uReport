@@ -6,9 +6,7 @@ More information can be found here: https://github.com/SkriptLang/Skript/release
 
 **! NOTE**
 
-This is an unfinished project from 2020/21,
-the project was created from scratch by me and is for public viewing.
-
+This is an unfinished project from 2020/21, the project was created from scratch by me and is for public viewing.
 **The code is not complete and may contain errors due to abandonment.**
 
 The project was intended to be even more extensive. **Currently you can find there:**
