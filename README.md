@@ -1,5 +1,5 @@
 # uReport
-Skript-based reporting system for minecraft servers
+Reporting system for minecraft servers based on the Skript language
 
 **! NOTE**
 
