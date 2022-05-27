@@ -1,0 +1,621 @@
+msg:
+    translation_not_found: Translation was not found!
+    lang: English
+    lang_desc: Click to download English language pack!
+    PL: Polish
+    EN: English
+    error: An unexpected error has occurred! We apologise for the inconvenience.
+    error_console: Only console can execute this command!
+    error_occured: "&7An &c&lERROR&7 has occured with uReport."
+    error_id_code: "ERROR ID code"
+    error_details: "Details"
+    error_player: "Player who caused an issue"
+    error_E000: "An unexpected error has occurred, NOT YOUR FAULT!"
+    error_E001: "CFG: id_length, value is not within the limit. Current limit: &c[{arg1}, {arg2}]&7, given value: &c{arg3}"
+    error_E002: 'R: Returned value equals incorrect value: "false"'
+    reloaded: "&eReloaded uReport in"
+    reloaded_lang: "&eReloaded &6language pack &esuccessfully!"
+    reloaded_cfg: "&eReloaded &6config &esuccessfully!"
+    reloaded_long: "&euReport took longer to load than expected -"
+    max: MAX
+    undefined: undefined
+    current_lang: Your current language is
+    refreshed_lang: Your language has been refreshed!
+    changed_lang: Your language has been successfully changed to
+    lang_not_exist: This language is not in the list of available languages!
+    no_langs_found: No languages were found in the languages folder.
+    language_pack: Language pack
+    langs_list: "List of available languages:"
+    no_perm: Insufficient permission!
+    cmd_cant_execute: "Cannot execute this command now!"
+    link_protected: "Link is protected by uReport!"
+    link_not_protected: "Link is not protected by uReport!"
+    report_title: What would you like to report?
+    report_specify: Specify details of your report
+    report_send_player: Please send name of player that you want to report in chat
+    report_send_cancel: Type &ccancel &7to cancel the action.
+    report_cancelled: Action cancelled!
+    report_player_short: "Given nickname is out of range:"
+    report_URL_limit: "&eYou may include a maximum of &6{arg1} &elinks."
+    report_empty_link: "&eDo not include &6empty links&e, links must be separated by a comma."
+    report_ref_link: "&eYour link may have been a &6reference link&e, we do not approve these types of links."
+    report_time_out: Request timed out!
+    report_go_back: <- Go back
+    report_submit: Submit report
+    report_submit_no: Cannot submit report yet!
+    report_submit_yes: Click here to submit report!
+    report_select_player: Select player
+    report_to_report: to report
+    report_selected_player: "Selected player:"
+    report_select_type: Select type of report
+    report_selected_type: "Selected type:"
+    report_select_priority: Select priority of report
+    report_selected_priority: "Selected priority:"
+    report_desc: Provide short description
+    report_your_desc: "Your description:"
+    report_send_desc: "Please provide a short description in chat below"
+    report_link: Provide link(s) to screenshot(s)
+    report_your_links: "Your links:"
+    report_send_link: "Please provide link(s) separated by comma (,)"
+    report_send_link_wl: "You can upload your image(s) to one of the following sites:"
+    report_link_not_wl: "&7Your link &c&l{arg1} &7is not from whitelisted website! Please change site to whitelisted one."
+    report_link_not_secure: "&7Your link &c&l{arg1} &7might not come from secured website. We are trying to provide the best experience for our users; sorry for inconvenience. Try using other website!"
+    report_optional: This option is optional
+    report_type_player: "&6Player"
+    report_type_bug: "&cBug"
+    report_type_account: "&bAccount Problem"
+    report_type_payment: "&dPayment Problem/Question"
+    report_type_other: "&eOther"
+    report_type_player_1: "Cheats / Hacks >item:lava bucket"
+    report_type_player_2: "Abuse >item:redstone"
+    report_type_player_3: "Harassment >item:redstone torch"
+    report_type_player_4: "Breaking rules >item:paper"
+    report_type_player_5: "Other >item:feather"
+    report_type_bug_1: "Security issue >item:end portal frame"
+    report_type_bug_2: "Map issue >item:map"
+    report_type_bug_3: "Plugin / Command issue >item:redstone dust"
+    report_type_bug_4: "uReport issue >item:cake"
+    report_type_bug_5: "Other issue >item:feather"
+    report_type_account_1: "Password change >item:book and quill"
+    report_type_account_2: "Nickname change >item:paper"
+    report_type_account_3: "Other >item:feather"
+    report_type_payment_1: "Purchase problem >item:paper"
+    report_type_payment_2: "Refund >item:gold ingot"
+    report_type_payment_3: "Payment method >item:bucket"
+    report_type_payment_4: "Question >item:redstone lamp"
+    report_type_payment_5: "Other problem >item:feather"
+    report_priority_1: "&cVery urgent$${mark} &7Issue is really serious^^{mark} &7Seriously jeopardises the quality of gameplay. >item:red stained glass pane"
+    report_priority_2: "&6Urgent$${mark} &7Issue is serious^^{mark} &7Can potentially jeopardise the quality of gameplay. >item:orange stained glass pane"
+    report_priority_3: "&eNeutral$${mark} &7Issue is somewhat serious^^{mark} &7Does not affect the quality of the gameplay that much. >item:yellow stained glass pane"
+    report_priority_4: "&2Bearable$${mark} &7Issue is not that serious^^{mark} &7Does not hinder gameplay too much. >item:green stained glass pane"
+    report_priority_5: "&aNot urgent$${mark} &7Issue is not serious^^{mark} &7Needs to be repaired, but not immediately. >item:lime stained glass pane"
+    report_created: "&eReport &6#{arg1} &ehas been sent to available admins."
+    report_admins: "&7Currently there is/are &e{arg1} &7admin(s) online!"
+    new_report_1: "Hey! You have just got a new report, check it out:"
+    new_report_2_1: "&eReported: &c{arg1} &7| &eID: &6#{arg2} &7| &eReporter: &c{arg3}"
+    new_report_2_2: "&ePriority: &6{arg1} &7| &eID: &6#{arg2} &7| &eReporter: &c{arg3}"
+    new_report_3: "Click here to investigate this issue."
+    processing: "Processing, please wait..."
+    report_click_here: "Click here for more info"
+    report_added: "Added"
+    report_menu: "&eReport &6#{arg1}"
+    report_status: "Status"
+    report_reported: "Reported"
+    report_reporter: "Reporter"
+    report_priority: "Priority"
+    report_type: "Type"
+    report_category: "Category"
+    report_description: "Description"
+    report_links: "Links"
+    report_np: "&c[✘]"
+    report_p: "&a[✓]"
+    report_leftclick: "  Left-click to manage this report"
+    report_rightclick: "  Right-click to take the leadership"
+    report_middleclick: "  Middle-click to leave the leadership"
+    report_status_1: "&2Active"
+    report_status_2: "&cInactive"
+    report_status_3: "&bTaken by {arg1}"
+    report_status_4: "&aCompleted"
+    report_status_5: "&4Cancelled"
+    report_a_priority: "Manage priority"
+    report_a_curr_priority: "Current priority:"
+    report_a_type: "Manage type"
+    report_a_curr_type: "Current type:"
+    report_a_desc: "Description"
+    report_a_links: "Manage links"
+    report_a_click_link: "Click to send link in chat."
+    report_a_link1: "Click on link to open it:"
+    report_a_teleport: "Teleport"
+    report_a_teleport2: "Select teleportation"
+    report_a_teleported: "&eTeleported &6{arg1} &eto &6{arg2}"
+    report_a_you_teleported: "You were teleported to"
+    report_a_not_online: "is not online!"
+    report_a_teleport_yourself: "You cannot teleport to yourself!"
+    report_a_leftclick_to: "Left-click to teleport:"
+    report_a_rightclick_to: "Right-click to teleport:"
+    report_a_status: "Manage status"
+    report_a_curr_status: "Current status:"
+    report_a_report_updated: "&eInformation about report &6#{arg1} &eupdated:"
+    report_a_status_changed: "&eStatus changed to:"
+    report_a_prize: "Give prize"
+    report_a_history: "Show history"
+    report_a_delete: "Delete report"
+    report_a_delete_q: "Confirm deletion of report"
+    report_a_report_deleted: "Your report has been deleted!"
+    report_a_confirm: "&a[✓] Confirm"
+    report_a_cancel: "&c[✘] Cancel"
+    report_a_no_type: "No type selected"
+    report_a_no_priority: "No priority selected"
+    report_a_menu_status: "Status #{arg1}"
+    report_a_menu_history: "History #{arg1}"
+    report_a_history_of: "History of actions"
+    report_a_no_history: "There is no history of action"
+    report_a_reports: "List of reports"
+    report_a_no_report: "This report doesn't exist!"
+    report_a_no_reports: "List of reports is empty."
+    report_a_chat: "Private chat"
+    report_a_input_name: "Please enter player's nickname in chat."
+    report_a_chat_add: "Add more players to conversation"
+    report_a_chat_lock: "You cannot remove this player from the conversation"
+    report_a_chat_player_added: "&ePlayer &6{arg1} &ewas added to the conversation list."
+    report_a_chat_player_already: "&ePlayer &6{arg1} &eis already on the conversation list."
+    report_a_chat_click_remove: "Click to remove player from the conversation"
+    report_a_chat_limit1: "You cannot add more players to the conversion. Limit reached!"
+    report_a_chat_start: "Click to start conversation"
+    report_a_chat_stop: "Click to stop conversation"
+    report_a_chat_started: "has just started the conversation"
+    report_a_chat_type: "&eType &6!join #{arg1} &eto join the conversation"
+    report_a_chat_recorded: "&7&oRemember that conversation history is recorded"
+    report_a_info: "info"
+    report_a_deleted: "Report {arg1} has been successfully deleted"
+    report_a_not_deleted: "We couldn't delete report {arg1} successfully"
+    report_history_more: "and {arg1} more"
+    report_history_of_info: "&7History of report &6#"
+    report_a_click_links: "Left-click to access links"
+    report_a_history_middle: " Middle-click to clear history of actions"
+    report_taken_leadership: "&eYou have taken the &6leadership &eof report"
+    report_left_leadership: "&eYou have left the &6leadership &eof report"
+    report_a_not_leader: "You are not the leader of this report!"
+    report_a_already_leader: "You are the leader of another report"
+    report_a_click_leave: "Click to leave leadership of this report"
+    report_a_own_report: "You cannot be the leader of your own report!"
+    report_history_status_change: "&6{arg1} &7changed status to &6{arg2}"
+    report_history_clear: "&6{arg1} &7cleared history of actions"
+    report_history_taken_leadership: "&6{arg1} &etook &7the leadership"
+    report_history_left_leadership: "&6{arg1} &eleft &7the leadership"
+    report_history_change_priority: "&6{arg1} &7changed priority to &6{arg2}"
+    report_history_change_type: "&6{arg1} &7changed type to &6{arg2}"
+    report_history_create_case: "&6{arg1} &7created report with ID &6#{arg2}"
+    report_history_player_chat_added: "&6{arg1} &7added &6{arg2} &7to conversation"
+    report_history_player_chat_removed: "&6{arg1} &7removed &6{arg2} &7from conversation"
+    report_history_change_desc: "&6{arg1} &7changed description"
+    report_history_change_link: "&6{arg1} &7changed links"
+    myreports_menu: "MyReports Menu"
+    myreports_reports: "Your reports"
+    myreports_manage: "Manage report #{arg1}"
+    myreports_settings: "Settings"
+    myreports_chats: "Conversations"
+    myreports_no_reports: "You don't have any active reports!"
+    myreports_click_to_add: "Click to add or change it!"
+    today_at: "Today at"
+    yesterday_at: "Yesterday at"
+    days_ago_at: "days ago at"
+    at: "at"
+    uninstall_done: Reinstallation complete!
+    uninstall_info: Would you like to completely uninstall uReport?
+    uninstall_warning: "&c&lPLEASE NOTE: &7This action cannot be undone!"
+    uninstall_core: Deleting core folder
+    uninstall_variables: Deleting all uReport variables
+    uninstalling: "&c&luReport is uninstalling, please wait..."
+    reinstall_warning:
+        "||||&c&lWARNING! &7Reinstallation will cause:||&7- removal of
+        core uReport folder||&7- removal of all variables||&7- reset of whole config and
+        every language pack||&7This will be basically a reset of &cWHOLE &7uReport.||"
+    reinstall_type_console: Type &e/ur reinstall &7in console to start the reinstallation!
+    reinstall_type_here: Type &e/ur reinstall &7here to start the reinstallation!
+    reinstall_soon: Reinstallation will begin in 5 seconds, please wait...
+    confirm: Enter the same command again to confirm the action.
+    cancelled: Cancelled!
+    config_path_not_exist: This option in config doesn't exist!
+    config_disabled: "Successfully disabled option:"
+    config_already_disabled: This option is already disabled!
+    config_enabled: "Successfully enabled option:"
+    config_already_enabled: This option is already enabled!
+    config_isenabled: Option {arg1} is &aenabled&7!
+    config_isdisabled: Option {arg1} is &cdisabled&7!
+    config_set: Successfully changed value of {arg1} to
+    config_input_value: Enter the new value of this option in the chat.
+    config_timed_out: Request timed out; nothing changed.
+    config_cannot_action: Cannot execute the action for this parameter!
+    config_manager: Config Manager
+    config_menu: menu
+    config_manage: Manage
+    config_updates: updates
+    config_logs: logs
+    config_URL: URL protection
+    config_other: other
+    config_back: <- go back to menu
+    config_reload: "Reload config"
+    config_not_found_desc: Couldn't find description for this option!
+    config_current_value: "$$&f » &7Current value: {arg1}$$$$&f » &6Description:$$"
+    config_name_auto_update_uReport: Auto update of uReport
+    config_lore_auto_update_uReport:
+        "{mark}&7Updates for &euReport &7will be downloaded$${mark}&7automatically
+        &o(without executing commands manually)"
+    config_name_update_notif: Notifications about updates
+    config_lore_update_notif:
+        "{mark}&7If any auto update option is disabled and this
+        option is enabled$${mark}&7you will recieve notification about available update"
+    config_name_send_update_logs: Logs while uReport updates
+    config_lore_send_update_logs: "{mark}&7Sends logs to console while uReport is updating"
+    config_name_loading_logs: Logs when uReport loads
+    config_lore_loading_logs:
+        "{mark}&7Sends logs while uReport is loading (when server
+        starts)"
+    config_name_passwd_required: Password required
+    config_lore_passwd_required:
+        "{mark}&7Should some commands be protected with password?$${mark}&7&oYou
+        can change the password in config.yml file"
+    config_name_session_time: Session time
+    config_lore_session_time:
+        "{mark}&7After entering the correct password, for how
+        long$${mark}&7(in minutes) does the player not have to enter the password again?"
+    config_name_id_length: "Length of ID"
+    config_lore_id_length: "{mark}&7How long should ID of reports be?$${mark}&76 = 6 characters long, e.g. 123456"
+    config_name_rep_status_1: "Material type [1]"
+    config_lore_rep_status_1: '{mark}&7Material of report with status "&aactive&7"'
+    config_name_rep_status_2: "Material type [2]"
+    config_lore_rep_status_2: '{mark}&7Material of report with status "&cinactive&7"'
+    config_name_rep_status_3: "Material type [3]"
+    config_lore_rep_status_3: '{mark}&7Material of report with status "&9taken by admin&7"'
+    config_name_rep_status_4: "Material type [4]"
+    config_lore_rep_status_4: '{mark}&7Material of report with status "&dexpired&7"'
+    config_name_rep_status_5: "Material type [5]"
+    config_lore_rep_status_5: '{mark}&7Material of report with status "&6cancelled&7"'
+    config_name_URL_whitelist: "URL whitelist"
+    config_lore_URL_whitelist: "{mark}&7Should links be protected and come from trusted source?$${mark}&7List of allowed sites can be found in config.yml file.$${mark}&7If this option is &cdisabled &7all the other URL options are disabled, too."
+    config_name_URL_allow_reflinks: "URL allow reference links"
+    config_lore_URL_allow_reflinks: "{mark}&7Should uReport allow to use &ereference links&7?"
+    config_name_URL_allow_httplinks: "URL allow http links"
+    config_lore_URL_allow_httplinks: "{mark}&7Should uReport allow to use &ehttp:// &7in links?$${mark}&7Sites that start with this phrase may be dangerous."
+    config_name_URL_allow_emptylinks: "URL allow empty links"
+    config_lore_URL_allow_emptylinks: "{mark}&7Should uReport allow to use &eempty links&7?"
+    config_name_URL_limit: "Amount of links limit"
+    config_lore_URL_limit: "{mark}&7How many links can a user add at most?"
+    config_name_player_name_min_len: "Minimal length of player name"
+    config_lore_player_name_min_len: "{mark}&7What minimum length of player's nickname should be accepted?"
+    config_name_player_name_max_len: "Maximum length of player name"
+    config_lore_player_name_max_len: "{mark}&7What maximum length of player's nickname should be accepted?"
+    version_outdated1: outdated
+    version_your: "Your version:"
+    version_latest: "Latest version:"
+    version_outdated: Your version is outdated! It is recommended to update it.
+    version_current2: "You have the latest version"
+    version_cfg: "Config version:"
+    version_lang: "Language pack version:"
+    version_ureport: "uReport version:"
+    version_click_update: If version is outdated, click on it to download newer one
+    please_wait: Please wait while we're working...
+    restore_cfg: Config has been backed up and restored to factory settings!
+    restore_cfg_err:
+        There was a problem while restoring the config file to factory
+        settings! Check console for more information.
+    restore_lang: Language pack restored to factory settings!
+    restore_lang_err:
+        There was a problem while restoring language pack to factory settings!
+        Check console for more information.
+    refresh_cfg: Config has been refreshed!
+    refresh_cfg_err: There was a problem while refreshing the config file!
+    click_update: "Click here to update!"
+    update_begin:
+        The update is starting... Please do not stop the server or execute
+        any other commands...
+    update_success: Everything has been successfully updated.
+    update_fail: The update could not be downloaded correctly!
+    update_available: There is an update available!
+    update_ver: From version {arg1} to {arg2}
+    update_final: Click here or type &e/ur update download &7to update!
+    update_click: Click here to update uReport!
+    update_update: Update
+    update_ureport: uReport
+    update_config: config
+    update_lang: language pack
+    update_disable: Click here to disable this notification.
+    update_click-disable: Click here to disable it
+    update_logs:
+        Logs are sent to the console when uReport updates! &o(Click here to
+        disable this feature)
+    update_logs_bucfg: Backup of config file has been made.
+    update_logs_bulog: Backup of logs file has been made.
+    update_logs_filedeleted: .sk file has been deleted.
+    update_logs_downloading: Downloading new version of uReport, please wait...
+    update_logs_downloaded: New version downloaded. Version updated ~
+    update_logs_patch1: Patching new config with previous settings...
+    update_logs_patch2: Patching new language file with previous settings...
+    update_logs_done: Done!
+    update_logs_criterror: Critical error! Aborting.
+    updated_latest: "Updated uReport to the latest version"
+    updated_link: "Click here to see changelog on spigotmc!"
+    update_menu: Update menu
+    update_updates: updates
+    update_files: files
+    config_updated: Config has been updated to version
+    lang_updated: Language pack has been updated to version
+    lang_owned: "&aOwned &7| &cNot Owned"
+    version: "Version:"
+    version_not_found:
+        The current version cannot be determined. Re-installation is
+        suggested (without data loss).
+    version_c_current: You have the latest version ~
+    version_current:
+        "&aYou have the latest version of uReport!||&7You can reinstall
+        your script by typing &e/ur reinstall"
+    version_c_outdated: Your version is outdated! You should consider updating it.
+    cuslang_exists: Custom language file already exists!
+    cuslang_generated: Custom language file has been generated successfully.
+    cuslang_error_gen: An error occured while creating custom language file!
+    cuslang_error_exists: The file already exists in the language folder!
+    cuslang_error_not_exists: The file doesn't exist. You can create it first.
+    cuslang_deleted_file: The custom language file has been deleted.
+    addons_check: "&eRequired add-ons:"
+    addons_all_req: You have every required add-on.
+    addons_nall_req:
+        You do &cNOT &7have all required add-ons. Without them the script
+        may not work properly.
+    reinstall_files_begin:
+        The reinstallation of files has started, please be patient
+        and do not execute any commands until the reinstallation is complete. You will
+        be informed when the process is complete.
+    search_question: "Question:"
+    search_results: "&6Results: &7&o[click to show answer]"
+    search_accuracy: "Accuracy:"
+    search_click_to_show: Click here to show answer.
+    search_no_question: You must state the question you want answered.
+    search_answer: "&6Best-fitting answer:"
+    backup_success: The file was backed up successfully.
+    backup_error_f_exists:
+        "&cError! &7There was a problem when creating a backup file.
+        &c  Details: &7A file with the same date (probably) exists"
+    sk_reload: Try using &e/ur rel &7to reload uReport!
+    pref_lang: "The preferred language has been changed to:"
+    setup_timezone: "Your current time is:"
+    setup_timezone2: If this is not true, type &e/ur timezone set [YOUR TIMEZONE]
+    setup_cfg_dl1: Downloading config... (attempt
+    setup_cfg_dl2: Config downloaded successfully.
+    setup_cfg_dlerr: Couldn't download config.yml file properly!
+    setup_preparing: Preparing the work environment... Please wait...
+    setup_checking_files: Checking all required files... Give us a moment...
+    setup_cfg_exists: config.yml file exists...
+    setup_cfg_not_exists: config.yml file doesn't exist!
+    setup_logs_exists: logs.yml file exists...
+    setup_logs_not_exists: logs.yml file doesn't exist!
+    setup_langs_exists: Languages folder exists...
+    setup_langs_not_exists: Languages folder doesn't exist!
+    setup_patches_exists: Patches folder exists...
+    setup_patches_not_exists: Patcher folder doesn't exist!
+    setup_tmp_exists: tmp folder exists...
+    setup_tmp_not_exists: tmp folder doesn't exist!
+    setup_info1: Type &e/ur language list &7to see a list of additional language packs.
+    setup_info2:
+        Type &e/ur language download [LANGUAGE] &7to download additional language
+        packs.
+    setup_info3:
+        If you would like to change the configuration of uReport, please do
+        so by typing &e/ur config &7on the server!
+    setup_info4:
+        Have a question? You can search our FAQ database for answers!||&7Type
+        &e/ur search [your question] &7to find answers to the most popular questions!
+    setup_info5: "&auReport is ready to use! :)"
+    wrong_passwd: Incorrect password!
+    passwd_success: "&aPassword correct&7, your session will expire in {arg1} minutes!"
+    session_expired: Session expired!
+    passwd_required:
+        "&cError! &7Password is required to execute this command.||&7Please
+        provide password as the last argument."
+    timezone_changed: Time zone changed from {arg1} to {arg2}
+    timezone_warning: If an error occurs - provided time zone doesn't exist!
+    timezone_exists: Provided time zone exists!
+    timezone_current: Your time zone is {arg1} and currently it's
+    history_empty: History of {arg1} is empty!
+    history_updates: History of
+    history_page: Page
+    history_updated: "{arg1} -> {arg2} [{arg3}]"
+    history_cleared: History cleared!
+    click_remove: "Click here to remove option"
+    prev_page: previous page
+    next_page: next page
+    logs_backup_of: Backup of
+    logs_created: created
+    logs_ur_updated: Updated uReport
+    logs_cfg_updated: Updated config.yml
+    logs_cfg_restored: Restored config.yml to fabric settings
+    logs_lang_updated: Updated language pack files
+    logs_lang_dl: Downloaded language pack
+    logs_setup: I have completed the set up of uReport, it's ready to use!
+    logs_loading_cfg: Loading config...
+    logs_loading_lang: Loading language pack...
+    logs_loaded_ur: "uReport loaded with version:"
+    help_a_ni_click: Click for more information about&6
+    help_a_ni_click2: Click to try out the command!
+    help_a_ni_page_not_exist: This page doesn't exist!
+    help_a_ni_back: Click here to return to the main help page
+    help_a_ni_title: Help with admin commands of uReport
+    help_a_i_2: "&7[] = &crequired&7, &7<> = &aoptional&7, &7/ = &echoice"
+    help_a_i_3: Click on a command for more detailed information
+    help_a_i_para0: "&f/ur&6 help &f<argument>"
+    help_a_i_para1: "&f/ur&6 FAQ &f[question]"
+    help_a_i_para2: "&f/ur&6 update &f<argument>"
+    help_a_i_para3: "&f/ur&6 language &f[argument] <argument>"
+    help_a_i_para4: "&f/ur&6 history &f[argument] <argument>"
+    help_a_i_para5: "&f/ur&6 timezone &f[argument] [argument]"
+    help_a_i_para6: "&f/ur&6 reset &f[argument] <argument>"
+    help_a_i_para7: "&f/ur&6 config &f[argument] <argument>"
+    help_a_i_para9: "&f/ur&6 backup &f[argument]"
+    help_a_i_para10: "&f/ur&6 addons"
+    help_d_i_cmd_help_0: "&6Command: &7/ur help <argument 2>"
+    help_d_i_cmd_help_1: "&6Description: &7Opens this menu or menu with certain command"
+    help_d_i_cmd_help_2: " "
+    help_d_i_cmd_help_3: "&f* argument 2: &7Any command that you need help with"
+    help_d_i_cmd_help_4: "&f* examples: &8-> &7&oClick to try out!"
+    help_d_i_cmd_help_5: "&e   /ur help update &8-> &fShows help page about update command"
+    help_d_i_cmd_help_6: "&e   /ur help config &8-> &fShows help page about update config"
+    help_d_i_cmd_update_0: "&6Command: &7/ur update <argument 2>"
+    help_d_i_cmd_update_1: "&6Description: &7Checks or updates chosen argument"
+    help_d_i_cmd_update_2: " "
+    help_d_i_cmd_update_3: "&f* arguments:"
+    help_d_i_cmd_update_4: "&e   check &8-> &fChecks if there is an available update"
+    help_d_i_cmd_update_5: "&e   download &8-> &fDownloads a new update if available"
+    help_d_i_cmd_update_6: "&f* examples: &8-> &7&oClick to try out!"
+    help_d_i_cmd_update_7: "&e   /ur update &8-> &fOpens menu of updates"
+    help_d_i_cmd_update_8:
+        "&e   /ur update download &8-> &fDownloads the update of
+        uReport"
+    help_d_i_cmd_history_0: "&6Command: &7/ur history [argument 2] <argument 3>"
+    help_d_i_cmd_history_1: "&6Description: &7Sends uReport's update history"
+    help_d_i_cmd_history_2: " "
+    help_d_i_cmd_history_3: "&f* option 1: &euReport <clear>"
+    help_d_i_cmd_history_4: "&f* argument 3:"
+    help_d_i_cmd_history_5:
+        "&e   clear &8-> &fClears the history of updates of argument
+        2"
+    help_d_i_cmd_history_6: "&f* examples: &8-> &7&oClick to try out!"
+    help_d_i_cmd_history_7: "&e   /ur history uReport &8-> &fShows history of updates of uReport"
+    help_d_i_cmd_timezone_0: "&6Command: &7/ur timezone [argument 2] [argument 3]"
+    help_d_i_cmd_timezone_1: "&6Description: &7Shows or changes your timezone"
+    help_d_i_cmd_timezone_2: " "
+    help_d_i_cmd_timezone_3: "&f* option 1: &e- &7(no argument)"
+    help_d_i_cmd_timezone_4: "&f* option 2: &e[change] [TIMEZONE]"
+    help_d_i_cmd_timezone_5: "&f* examples: &8-> &7&oClick to try out!"
+    help_d_i_cmd_timezone_6: "&e   /ur timezone change CET"
+    help_d_i_cmd_timezone_7: "&e   /ur timezone change GMT+1"
+    help_d_i_cmd_reset_0: "&6Command: &7/ur reset [argument 2] <argument 3>"
+    help_d_i_cmd_reset_1: "&6Description: &7Resets argument 2 to factory settings"
+    help_d_i_cmd_reset_2: " "
+    help_d_i_cmd_reset_3: "&f* option 1: &e[language] <LANGUAGE>"
+    help_d_i_cmd_reset_4: "&f* option 2: &e[config]"
+    help_d_i_cmd_reset_5: "&f* examples: &8-> &7&oClick to try out!"
+    help_d_i_cmd_reset_6: "&e   /ur reset language EN &8-> &fresets EN only"
+    help_d_i_cmd_reset_7: "&e   /ur reset language &8-> &fresets every language"
+    help_d_i_cmd_config_0: "&6Command: &7/ur config [argument 2] <argument 3>"
+    help_d_i_cmd_config_1: "&6Description: &7Opens config menu if argument is not given"
+    help_d_i_cmd_config_2: " "
+    help_d_i_cmd_config_3: "&f* option 1: &e- &7(no argument)"
+    help_d_i_cmd_config_4: "&f* option 2: &erel<oad>"
+    help_d_i_cmd_config_5:
+        "&f* option 3: &e[enable/disable/toggle/set] [config.yml
+        option]"
+    help_d_i_cmd_config_6: "&f* examples: &8-> &7&oClick to try out!"
+    help_d_i_cmd_config_7: "&e   /ur config disable auto_update_uReport"
+    help_d_i_cmd_config_8:
+        "&e   /ur config set passwd !Q@W#E &8-> &fadditional permission
+        needed"
+    help_d_i_cmd_config_9: "&e   /ur cfg set session_time 5"
+    help_d_i_cmd_config_10: "&e   /ur cfg rel &8-> &freloads config"
+    help_d_i_cmd_backup_0: "&6Command: &7/ur backup [argument 2]"
+    help_d_i_cmd_backup_1: "&6Description: &7Backups selected argument to tmp folder"
+    help_d_i_cmd_backup_2: " "
+    help_d_i_cmd_backup_3: "&f* option 1: &eall"
+    help_d_i_cmd_backup_4: "&f* option 2: &e[config/logs]"
+    help_d_i_cmd_backup_5: "&f* examples: &8-> &7&oClick to try out!"
+    help_d_i_cmd_backup_6: "&e   /ur backup cfg &8-> &fbackups config"
+    help_d_i_cmd_backup_7: "&e   /ur backup all &8-> &fbackups everything"
+    help_d_i_cmd_FAQ_0: "&6Command: &7/ur FAQ [argument 2]"
+    help_d_i_cmd_FAQ_1:
+        "&6Description: &7Shows a list of the most relevant answers
+        to the questions"
+    help_d_i_cmd_FAQ_2: " "
+    help_d_i_cmd_FAQ_3: "&f* option: &e[FAQ] [YOUR QUESTION]"
+    help_d_i_cmd_FAQ_4: "&f* examples: &8-> &7&oClick to try out!"
+    help_d_i_cmd_FAQ_5: "&e   /ur FAQ How to edit config.yml file?"
+    help_d_i_cmd_FAQ_6: "&e   /ur FAQ Can I change uReport's code?"
+    help_d_i_cmd_language_0: "&6Command: &7/ur lang [argument 2] <argument 3>"
+    help_d_i_cmd_language_1: "&6Description: &7Manages language packs"
+    help_d_i_cmd_language_2: " "
+    help_d_i_cmd_language_3:
+        "&f* option 1: &e[lang] [list] &8-> &fdisplays list of
+        available languages"
+    help_d_i_cmd_language_4: "&f* option 2: &e[lang] [change] [LANGUAGE]"
+    help_d_i_cmd_language_5:
+        "&f* option 3: &e[lang] [reload] &8-> &freloads current
+        language"
+    help_d_i_cmd_language_6: "&f* option 3: &e[lang] [download] [LANGUAGE/all]"
+    help_d_i_cmd_language_7: "&f* examples: &8-> &7&oClick to try out!"
+    help_d_i_cmd_language_8: "&e   /ur language list"
+    help_d_i_cmd_language_9:
+        "&e   /ur lang dl EN &8-> &fdownloads English language
+        pack"
+    help_d_i_cmd_language_10: "&e   /ur lang rel &8-> &freloads current language"
+    help_d_i_cmd_addons_0: "&6Command: &7/ur addons"
+    help_d_i_cmd_addons_1: "&6Description: &7Checks if you have every required addon"
+    help_d_i_cmd_addons_2: " "
+    help_d_i_cmd_addons_3: "&f* examples: &8-> &7&oClick to try out!"
+    help_d_i_cmd_addons_4: "&e   /ur addons"
+faq:
+    q1: How can I download any languange from the language file?
+    q1-a: to yml more
+    a1:
+        You can download any languange using command /gc language download [language]
+        - you can find a list of available languages using command /gc language list
+    q2: Can I configure config.yml file manually or do I have to do it using the menu?
+    q2-a: configuration
+    a2:
+        You can do it either way! Both are acceptable, but using the menu is safer than
+        updating manually - it reduces the risk of error and subsequent problems.
+    q3: Can I edit language pack files?
+    q3-a: change:2 languages lang file may
+    a3:
+        Yes, you can! They are fully customizable and safe to work with (all data is
+        saved after update).
+    q4: Can I restore my language pack files after changing them?
+    q4-a: may reset languages lang file when change it
+    a4:
+        "If you would like to reset changes, you can do it at any time by using the
+        following command: &e/ur restore language [-/language] &7where - means all languages."
+    q5: Is my language pack files saved after changing it?
+    q5-a:
+        do does languages lang file save when change overwrite overwritten lose lost
+        losing
+    a5:
+        After the update, previously changed data would be retained and new data would
+        be added to the file (nothing would be overwritten).
+    q6: How to update uReport?
+    q6-a: how to do download an update of skript ureport can
+    a6: "You can do it by using the following command: &e/ur update download"
+    q7: How to edit config.yml file?
+    q7-a: change modify can I config.yml:2 config:2
+    a7:
+        "You can change it manually, but it's not recommended or by using the following
+        command: &e/ur settings/config"
+    q8: Can I send you a feedback?
+    q8-a: review stars sent give information
+    a8: "Yes, you can! Use the following command: &e/ur feedback [your feedback]"
+    q9: Are you going to update uReport regularly?
+    q9-a: do you plan are planning often script skript plugin plug-in plug in
+    a9: Yes, I do plan to develop it!
+    q10: Can I disable auto-update function?
+    q10-a: how to remove delete auto update option settings setting
+    a10:
+        "You can disable it in the settings panel, use the following command: &e/ur
+        settings/config"
+    q11: What is a "tmp" folder? Do I need it?
+    q11-a: tmp temp can i delete it remove
+    a11:
+        This is the folder where your backup config.yml file and many other things
+        are stored. It is &cnot recommended &7to delete it. Deleting it may cause errors
+        or loss of necessary data.
+    q12: Where can I find all the files that are related to uReport?
+    q12-a: script this skript plugin plug-in folders folder
+    a12:
+        You can find them in your scripts folder, they were created automatically by
+        uReport! Although, it is not recommended to change them manually.
+    q13: Will I be notified about another update?
+    q13-a: notification upcoming skript script plugin plug-in get
+    a13:
+        "&aYes&7, you will, &cunless &7you haven't turned off the update notification
+        option in your configuration or disabled automatic updates."
+    q14: Can I change uReport's code?
+    q14-a: How edit:1 the program script of skript plugin a 's:2
+    a14:
+        Yes, you can, but if you don't know if it's safe to change the code, then don't
+        do it. Changing any line of code can mess up the algorythm. Do it only if you
+        are convinced that you know what you are doing.

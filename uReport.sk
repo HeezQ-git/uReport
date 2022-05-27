@@ -1,0 +1,2191 @@
+options:
+    # ---------- DO NOT CHANGE THIS SECTION ----------
+    addons: "TuSKe", "skUtilities", "SkQuery", "ProtocolLib" and "json.sk"
+    alias-report: zglos, zgłoś
+    blacklisted-parameters: "passwd"
+    id-min: 4
+    id-max: 10                       # DO NOT change, otherwise ID creation may not work correctly!
+    max-expected-time: 15 seconds    # uReport longest expected reloading time
+    types: "player", "bug", "account", "payment" and "other" # not recommended to change it if you don't know what to do with it
+    
+    # SYMBOLS - feel free to change
+    symbol-admin: [✦]
+
+    # MARKS - feel free to change
+    m-ur: &7[&euReport&7]          # mark: uReport
+    m-imp: &7[&c ! &7]            # mark: important
+    m-info: &7[&e ? &7]          # mark: information
+    m-suc: &7[&a✔&7]            # mark: success
+    m-error: &7[&4✘&7]         # mark: error
+    m-other: &f »              # mark: other / arrow
+
+    # BORDERS - feel free to change [if you know what you're doing]
+    line-u: &e▐▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+    line-w: &e▐ 
+    line-d: &e▐▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+on load:
+    uCreatePaths()
+    filesManager("all")
+    clear {ur::other::numbers::*}
+    set {_open::*} to 10, 19, 28 and 37
+    set {_close::*} to 16, 25, 34 and 43
+    loop 4 times:
+        loop (numbers between {_open::%loop-number%} and {_close::%loop-number%}):
+            add loop-value-2 to {ur::other::numbers::*}
+    
+    # ------------------------------------------------
+
+function refresh_lang(t: text = "") :: boolean:
+    delete {ur::lang::*}
+    set {_nodes::*} to skutil yaml nodes with keys "msg" from file "%{ur::paths::langs}%/lang_%{ur::lang}%.yml"
+    loop {_nodes::*}:
+        set {ur::lang::%loop-value%} to yaml value "msg.%loop-value%" from file "%{ur::paths::langs}%/lang_%{ur::lang}%.yml"
+        replace all "&" with "§" in {ur::lang::%loop-value%}
+        replace all "||" with new line in {ur::lang::%loop-value%}
+    if (size of {ur::lang::*}) > 0:
+        return true
+    return false
+
+function refresh_cfg(t: text = "") :: boolean:
+    loop ("cfg" and "perm"):
+        clear {ur::%loop-value%::*}
+        set {_nodes::*} to skutil yaml nodes with keys "%loop-value%" from file "%{ur::paths::ur}%/config.yml"
+        loop {_nodes::*}:
+            set {ur::%loop-value-1%::%loop-value-2%} to yaml value "%loop-value-1%.%loop-value-2%" from file "%{ur::paths::ur}%/config.yml"
+            if loop-value-1 = "perm":
+                set {ur::%loop-value-1%::%loop-value-2%} to "ur.%{ur::%loop-value-1%::%loop-value-2%}%"
+        clear {_nodes::*}
+    if (size of {ur::cfg::*}) > 0:
+        return true
+    return false
+
+function uCreatePaths(t: text = ""):
+    set {ur::paths::core} to "plugins/Skript/scripts"
+    set {ur::paths::ur} to "plugins/Skript/scripts/uReport"
+    set {ur::paths::logs} to "%{ur::paths::ur}%/logs.yml"
+    set {ur::paths::cfg} to "%{ur::paths::ur}%/config.yml"
+    set {ur::paths::patches} to "%{ur::paths::ur}%/patches"
+    set {ur::paths::langs} to "%{ur::paths::ur}%/langs"
+    set {ur::paths::tmp} to "%{ur::paths::ur}%/others"
+
+function replace_arg(t: text, ar1: text, ar2: text = "", ar3: text = "", ar4: text = "", ar5: text = "") :: text:
+    loop 5 times:
+        if {_t} contains "{arg%loop-number%}":
+            replace all "{arg%loop-number%}" with "%{_ar%loop-number%}%" in {_t}
+    return {_t}
+
+function getNewVersion(t: text = "") :: text:
+    set {_x::*} to contents from url "https://code.skript.pl/7ArY2qkd/raw" # https://api.spigotmc.org/legacy/update.php?resource=XXXXX
+    return {_x::1}
+
+function checkUpdate(t: text = "") :: boolean:
+    if {ur::version} = getNewVersion():
+        return true
+    return false
+
+function createList(t: objects) :: text:
+    loop {_t::*}:
+        if {_list} is not set:
+            set {_list} to "%loop-value%"
+        else:
+            set {_list} to "%{_list}%, %loop-value%"
+    return {_list}
+
+function logAction(t: text = "", t2: text = ""):
+    filesManager("logs")
+    set {_timestamp} to timezone {ur::timezone}'s time
+    if {_t} = "backup-cfg" or "backup-logs":
+        if {_t} = "backup-logs":
+            set {_type} to "logs"
+        else:
+            set {_type} to "config"
+        add "%{ur::lang::logs_backup_of}% %{_type}% %{ur::lang::logs_created}%! [%{_timestamp}%]" to skutil yaml list "logs" of file "%{ur::paths::logs}%"
+    else if {_t} = "update-uReport":
+        add "%{ur::lang::logs_ur_updated}% (%{_t2}% -> %{ur::version}%) [%{_timestamp}%]" to skutil yaml list "logs" of file "%{ur::paths::logs}%"
+    else if {_t} = "restore-cfg":
+        add "%{ur::lang::logs_cfg_restored}% (%{_t2}%) [%{_timestamp}%]" to skutil yaml list "logs" of file "%{ur::paths::logs}%"
+    else if {_t} = "dl-lang":
+        add "%{ur::lang::logs_lang_dl}% (%{_t2}%) [%{_timestamp}%]" to skutil yaml list "logs" of file "%{ur::paths::logs}%"
+    else if {_t} = "setup":
+        add "%{ur::lang::logs_setup}% [%{_timestamp}%]" to skutil yaml list "logs" of file "%{ur::paths::logs}%"
+
+function filesManager(t: text = "", o: text = "") :: boolean:
+    if (size of {ur::paths::*}) <= 0:
+        uCreatePaths()
+    if {_t} = "all" or "a":
+        loop {ur::paths::*}:
+            if loop-index != "core":
+                if "%loop-value%" doesn't contain ".":
+                    if {_o} = "rem" or "del":
+                        if skutil dir "%loop-value%" exists:
+                            skutil delete dir "%loop-value%"
+                    else:
+                        if skutil dir "%loop-value%" doesn't exist:
+                            skutil create dir "%loop-value%"
+                else:
+                    if {_o} = "rem" or "del":
+                        if skutil file "%loop-value%" exists:
+                            skutil delete file "%loop-value%"
+                    else:
+                        if skutil file "%loop-value%" doesn't exist:
+                            skutil create file "%loop-value%"
+    else if {_t} = "backup-cfg" or "backup-logs":
+        if {_t} = "backup-logs":
+            set {_type} to "logs"
+        else:
+            set {_type} to "config"
+        set {_time} to timezone {ur::timezone}'s time
+        replace all "/" and ":" with "-" in {_time}
+        set {_name} to "%{_type}% %{_time}%"
+        if skutil file "%{ur::paths::tmp}%/%{_name}%.yml" doesn't exist:
+            if file "%{ur::paths::tmp}%/%{_type}%.yml" exists:
+                skutil delete file "%{ur::paths::tmp}%/%{_type}%.yml"
+            if file "%{ur::paths::ur}%/%{_type}%.yml" exists:
+                skutil copy file "%{ur::paths::ur}%/%{_type}%.yml" to "%{ur::paths::patches}%"
+            skutil rename file "%{ur::paths::patches}%/%{_type}%.yml" to "%{_name}%.yml"
+            filesManager("Others")
+            skutil move file "%{ur::paths::patches}%/%{_name}%.yml" to "%{ur::paths::tmp}%"
+            set {ur::backup::cfg} to now
+            logAction({_t})
+            return true
+        return false
+    else if {_t} = "cfg":
+        if {_o} = "rem" or "del":
+            filesManager("backup-cfg")
+            if skutil file "%{ur::paths::cfg}%" exists:
+                skutil delete file "%{ur::paths::cfg}%"
+        else:
+            if skutil file "%{ur::paths::cfg}%" doesn't exist:
+                skutil create file "%{ur::paths::cfg}%"
+            if skutil file "%{ur::paths::cfg}%" exists:
+                return true
+            return false
+    else:
+        set {_f} to "%{ur::paths::%{_t}%}%"
+        if "%{_f}%" contains ".yml":
+            if {_o} = "rem" or "del":
+                if skutil file "%{_f}%" exists:
+                    skutil delete file "%{_f}%"
+            else:
+                if skutil file "%{_f}%" doesn't exist:
+                    skutil create file "%{_f}%"
+                if skutil file "%{_f}%" exists:
+                    return true
+                return false
+        else:
+            if {_o} = "rem" or "del":
+                if skutil dir "%{_f}%" exists:
+                    skutil delete dir "%{_f}%"
+            else:
+                if skutil dir "%{_f}%" doesn't exist:
+                    skutil create dir "%{_f}%"
+                if skutil file "%{_f}%" exists:
+                    return true
+                return false
+
+function langManager(t: text = "", lang: text = "") :: text:
+    if {_t} = "list" or "code":
+        set {_x::*} to skutil contents from url "https://code.skript.pl/Uk1wHpMp/raw"
+        set {_l::*} to {_x::1} split at ", "
+        if {_t} = "list":
+            loop {_l::*}:
+                add first 2 characters of "%loop-value%" to {_list::*}
+        else if {_t} = "code":
+            loop {_l::*}:
+                if loop-value contains {_lang}:
+                    set {_null} to loop-value
+            if {_null} is set:
+                return last 8 characters of {_null}
+            return "null"
+        set {_list} to createList({_list::*})
+        return {_list}
+    else if {_t} = "download" or "dl":
+        if {_lang} is set:
+            if langManager("list") contains {_lang}:
+                set {_code} to langManager("code", {_lang})
+                if {_code} != "null":
+                    skutil download file from "https://code.skript.pl/%{_code}%/raw" to file "%{ur::paths::langs}%/lang_%{_lang}%.yml"
+                    logAction("dl-lang", {_lang})
+                    return "{@m-suc} &aLanguage successfully downloaded!"
+                return "{@m-error} &cError: &7while downloading language pack.%nl%&cDetails: &7Returned code equals NULL."
+            else if {_lang} = "all":
+                set {_list} to langManager("list")
+                set {_list::*} to {_list} split at ", "
+                loop {_list::*}:
+                    langManager("dl", loop-value)
+            else:
+                return "{@m-error} &cError: &7while downloading language pack.%nl%&cDetails: &7Provided language pack doesn't exist."
+        else:
+            return "{@m-error} &cError: &7while downloading language pack.%nl%&cDetails: &7Unknown language pack."
+
+function uFix(p: player, t: text = "lang"):
+    if {_t} = "lang":
+        set {_name} to "langauge pack"
+        set {_type} to "lang"
+    else if {_t} = "cfg" or "config":
+        set {_name} to "config.yml"
+        set {_type} to "config"
+    send "{@m-error} An issue occurred while trying to reload &6%{_name}%" to {_p}
+    send "{@m-imp} &ouReport will attempt to fix the issue, please wait..." to {_p}
+    if {ur::lang} is not set:
+        set {ur::lang} to "EN"
+    if {_type} = "lang":
+        langManager("download", {ur::lang})
+    else if {_type} = "config":
+        downloadManager("config")
+    wait 2 seconds
+    if {_type} = "lang":
+        if refresh_lang() = true:
+            send "{@m-suc} uReport has resolved the issue, reloading..." to {_p}
+            execute {_p} command "ur rel"
+        else:
+            send "{@m-error} uReport wasn't able to resolve the issue, using second method..." to {_p}
+            downloadManager("lang", true, {ur::lang})
+            wait 2 seconds
+            if refresh_lang() = true:
+                send "{@m-suc} uReport has resolved the issue, reloading..." to {_p}
+                execute {_p} command "ur rel"
+            else:
+                send "{@m-error} Fatal error, uReport couldn't resolve the issue, try reinstalling or updating it!" to {_p}
+    else if {_type} = "config":
+        if refresh_cfg() = true:
+            send "{@m-suc} uReport has resolved the issue, reloading..." to {_p}
+            execute {_p} command "ur rel"
+        else:
+            send "{@m-error} uReport wasn't able to resolve the issue, using second method..." to {_p}
+            downloadManager("config", true)
+            wait 2 seconds
+            if refresh_lang() = true:
+                send "{@m-suc} uReport has resolved the issue, reloading..." to {_p}
+                execute {_p} command "ur rel"
+            else:
+                send "{@m-error} Fatal error, uReport couldn't resolve the issue, try reinstalling or updating it!" to {_p}
+
+function uTop(t: objects) :: objects:
+    loop (size of {_t::*}) times:
+        loop {_t::*}:
+            set {_i} to loop-index parsed as integer
+            set {_i1} to {_i}+1
+            if {_t::%{_i}%} < {_t::%{_i1}%}:
+                set {_1} to {_t::%{_i}%}
+                set {_2} to {_t::%{_i1}%}
+                set {_t::%{_i}%} to {_2}
+                set {_t::%{_i1}%} to {_1}
+    return {_t::*}
+
+function searchManager(t: text = "", p: text = "", answer: boolean = false):
+    if {_t} is set:
+        set {_p} to {_p} parsed as player
+        if {_answer} = false:
+            set {_nodes::*} to skutil yaml nodes with keys "faq" from file "%{ur::paths::langs}%/lang_%{ur::lang}%.yml"
+            loop {_nodes::*}:
+                set {_faq::%loop-value%} to yaml value "faq.%loop-value%" from file "%{ur::paths::langs}%/lang_%{ur::lang}%.yml"
+            set {_search::*} to {_t} split at " " and "."
+            loop {_faq::*}:
+                set {_z} to loop-index
+                if {_z} contains "q":
+                    replace all "g" and "-a" and "a" with "" in {_z}
+                    set {_words::%{_z}%::*} to loop-value split at " " and "."
+                    replace all "?" with "" in {_words::%{_z}%::*}
+                    loop {_words::%{_z}%::*}:
+                        loop {_search::*}:
+                            if loop-value-3 != "a" or "the" or "i":
+                                if loop-value-2 = loop-value-3:
+                                    replace all loop-value-3 with "" in {_words::%{_z}%::*}
+                                    if loop-value-2 contains ":":
+                                        set {_x::*} to loop-value-2 split at ":"
+                                        set {_pkt} to {_x::2}
+                                        add {_pkt} parsed as integer to {_accuracy::%{_z}%}
+                                    else:
+                                        add 2 to {_accuracy::%{_z}%}
+                                else if loop-value-2 contains loop-value-3:
+                                    replace all loop-value-3 with "" in {_words::%{_z}%::*}
+                                    if loop-value-2 contains ":":
+                                        set {_x::*} to loop-value-2 split at ":"
+                                        set {_pkt} to {_x::2}
+                                        add {_pkt} parsed as integer to {_accuracy::%{_z}%}
+                                    add 1 to {_accuracy::%{_z}%}
+            set {_b::*} to {_accuracy::*}
+            set {_accuracy::*} to uTop({_accuracy::*})
+            set {_save::*} to {_accuracy::*}
+            set {_x} to 1
+            loop {_accuracy::*}:
+                loop {_b::*}:
+                    if loop-value-1 = loop-value-2:
+                        set {_x::%loop-value-1%} to loop-index-2
+                        add 1 to {_x}
+                        remove loop-value-1 from {_accuracy::*}
+                        remove loop-value-2 from {_b::*}        
+            send "{@line-u}" to {_p}
+            send "{@line-w} &6%{ur::lang::search_question}% &f&o%{_t}%" to {_p}
+            send "{@line-w} &f%{ur::lang::search_results}%" to {_p}
+            send "{@line-w}" to {_p}
+            set {_x} to 0
+            set {ur::proc} to {_save::1}
+            loop {_save::*}:
+                if {ur::tmp::list::*} doesn't contain "%{_faq::q%{_x::%loop-value%}%}%":
+                    if {_x} <= 3:
+                        add 1 to {_x}
+                        set {_c} to "%loop-value%" parsed as integer
+                        add "%{_faq::q%{_x::%loop-value%}%}%" to {ur::tmp::list::*}
+                        json("%{_p}%", "{@line-w}&r {@m-other} &7&o%{_faq::q%{_x::%loop-value%}%}% &e&o(%{ur::lang::search_accuracy}% %round((100*{_c})/{ur::proc})%%%)||ttp:&e&o%{ur::lang::search_click_to_show}%||cmd:/ur answer %{_x::%loop-value%}%")
+            delete {ur::proc}
+            delete {ur::tmp::list::*}
+            send "{@line-w}" to {_p}
+            send "{@line-d}" to {_p}
+        else:
+            set {_q} to yaml value "faq.q%{_t}%" from file "%{ur::paths::langs}%/lang_%{ur::lang}%.yml"
+            set {_a} to yaml value "faq.a%{_t}%" from file "%{ur::paths::langs}%/lang_%{ur::lang}%.yml"
+            send "{@line-u}" to {_p}
+            send "{@line-w} &6%{ur::lang::search_question}% &f&o%{_q}%" to {_p}
+            send "{@line-w} &f%{ur::lang::search_answer}%" to {_p}
+            send "{@line-w}" to {_p}
+            send "{@line-w} {@m-other} &7%{_a}%" to {_p}
+            send "{@line-w}" to {_p}
+            send "{@line-d}" to {_p}
+
+function getCode(t: text = "") :: text:
+    if {_t} = "config" or "cfg":
+        return "FgPGZU7j"
+    else if {_t} = "script":
+        return "3e9PYL9C"
+
+function downloadManager(t: text = "", up: boolean = false, lang: text = "", notif: boolean = false) :: boolean:
+    if {_t} = "cfg" or "config":
+        filesManager("backup-cfg")
+        if {_up} = false:
+            return updateCfg()
+        return updateCfg("restore")
+    else if {_t} = "lang" or "language":
+        return updateLang({_lang}, {_up})
+    else if {_t} = "update":
+        if checkUpdate() = false:
+            if {ur::cfg::send_update_logs} = true:
+                send "{@m-ur} &7%{ur::lang::update_logs_bucfg}%" to console
+            filesManager("backup-cfg")
+            if {ur::cfg::send_update_logs} = true:
+                send "{@m-ur} &7%{ur::lang::update_logs_bulog}%" to console
+            filesManager("backup-logs")
+            if {ur::cfg::send_update_logs} = true:
+                send "{@m-ur} &7%script%%{ur::lang::update_logs_filedeleted}%" to console
+            skutil delete file "plugins/Skript/scripts/%script%.sk"
+            if {ur::cfg::send_update_logs} = true:
+                send "{@m-ur} &7%{ur::lang::update_logs_downloading}%" to console
+            skutil download file from "https://code.skript.pl/%getCode(""script"")%/raw" to file "plugins/Skript/scripts/%script%.sk"
+            if skutil file "plugins/Skript/scripts/%script%.sk" exists:
+                if {ur::cfg::send_update_logs} = true:
+                    send "&a> OK!" to console
+            else:
+                if {ur::cfg::send_update_logs} = true:
+                    send "&c> ERROR!" to console
+                    send "&c> %{ur::lang::update_logs_criterror}%" to console
+                return false
+            set {_old} to {ur::version}
+            set {ur::version} to getNewVersion()
+            if {ur::cfg::send_update_logs} = true:
+                send "{@m-ur} &7%{ur::lang::update_logs_downloaded}% &e%{ur::version}%" to console
+                send "{@m-ur} &7%{ur::lang::update_logs_patch1}%" to console
+            if updateCfg() = true:
+                if {ur::cfg::send_update_logs} = true:
+                    send "&a> OK!" to console
+            else:
+                if {ur::cfg::send_update_logs} = true:
+                    send "&cERROR!" to console
+                return false
+            if {ur::cfg::send_update_logs} = true:
+                send "{@m-ur} &7%{ur::lang::update_logs_patch2}%" to console
+            if {_up} = true:
+                set {ur::updated} to true
+                set {_x} to "restore"
+            if updateLang({_x}) = true:
+                if {ur::cfg::send_update_logs} = true:
+                    send "&a> OK!" to console
+            else:
+                if {ur::cfg::send_update_logs} = true:
+                    send "&c> ERROR!" to console
+                return false
+            if {ur::cfg::send_update_logs} = true:
+                send "{@m-ur} &a%{ur::lang::update_logs_done}%" to console
+            execute console command "sk disable %script%"
+            execute console command "sk enable %script%"
+            logAction("update-uReport", {_old})
+            set {_time} to timezone {ur::timezone}'s time
+            if {ur::history::ur::*} doesn't contain "%{_old}%;%{ur::version}%;%{_time}%":
+                add "%{_old}%;%{ur::version}%;%{_time}%" to {ur::history::ur::*}
+            if {_notif} = true:
+                loop all players where [input has permission "%{ur::perm::get_update_notif}%"]:
+                    updateNotify(loop-player, true)
+            return true
+        return false
+
+function updateCfg(t: text = "") :: boolean:
+    if {_t} != "restore":
+        refresh_cfg()
+        loop ("cfg" and "perm"):
+            loop {ur::%loop-value-1%::*}:
+                set {ur::tmp::%loop-value-1%::%loop-index%} to loop-value-2
+    filesManager("cfg", "rem")
+    skutil download file from "https://code.skript.pl/%getCode(""cfg"")%/raw" to file "%{ur::paths::ur}%/config.yml"
+    if {_t} != "restore":
+        loop ("cfg" and "perm"):
+            loop {ur::tmp::%loop-value-1%::*}:
+                if skutil yaml path "%loop-value-1%.%loop-index%" in file "%{ur::paths::ur}%/config.yml" exists:
+                    set skutil yaml value "%loop-value-1%.%loop-index%" from file "%{ur::paths::ur}%/config.yml" to loop-value-2
+    set {_old} to {ur::version_cfg}
+    set {ur::version_cfg} to getNewVersion("cfg")
+    logAction("update-cfg", {_old})
+    set {_time} to timezone {ur::timezone}'s time
+    if {ur::history::cfg::*} doesn't contain "%{_old}%;%{ur::version_cfg}%;%{_time}%":
+        add "%{_old}%;%{ur::version_cfg}%;%{_time}%" to {ur::history::cfg::*}
+    if refresh_cfg() = true:
+        clear {ur::tmp::*}
+        return true
+    return false
+
+function updateLang(t: text = "", restore: boolean = false) :: boolean:
+    if {_t} is "" or "null":
+        set {_x::*} to all files in "%{ur::paths::langs}%/"
+    else:
+        set {_x::1} to {_t}
+    replace all "lang_" and ".yml" with "" in {_x::*}
+    loop {_x::*}:
+        if skutil file "%{ur::paths::langs}%/lang_%loop-value-1%.yml" doesn't exist:
+            skutil create file "%{ur::paths::langs}%/lang_%loop-value-1%.yml"
+        if {_restore} != true:
+            set {_nodes::*} to skutil yaml nodes with keys "msg" from file "%{ur::paths::langs}%/lang_%loop-value-1%.yml"
+            loop {_nodes::*}:
+                set {ur::tmp::lang::%loop-value-1%::%loop-value-2%} to yaml value "msg.%loop-value-2%" from file "%{ur::paths::langs}%/lang_%loop-value-1%.yml"
+        skutil delete file "%{ur::paths::langs}%/lang_%loop-value%.yml"
+        set {_x} to langManager("dl", loop-value)
+        if {_restore} != true:
+            loop {ur::tmp::lang::%loop-value-1%::*}:
+                if skutil yaml path "msg.%loop-index-2%" in file "%{ur::paths::langs}%/lang_%loop-value-1%.yml" exists:
+                    set skutil yaml value "msg.%loop-index-2%" from file "%{ur::paths::langs}%/lang_%loop-value-1%.yml" to loop-value-2
+    set {_old} to {ur::version_lang}
+    set {ur::version_lang} to getNewVersion("lang")
+    logAction("update-lang", {_old})
+    set {_time} to timezone {ur::timezone}'s time
+    if {ur::history::lang::*} doesn't contain "%{_old}%;%{ur::version_lang}%;%{_time}%":
+        add "%{_old}%;%{ur::version_lang}%;%{_time}%" to {ur::history::lang::*}
+    clear {ur::tmp::*}
+    refresh_lang()
+    return true
+
+function updateNotify(p: player, update: boolean = false):
+    if {_update} = false:
+        if checkUpdate() = true:
+            stop
+        set {_ver} to getNewVersion()
+        if "%{_ver}%" doesn't contain "<none>":
+            send " " to {_p}
+            send "{@line-u}" to {_p}
+            send "{@line-w}" to {_p}
+            send "{@line-w} &6%{ur::lang::update_available}% &e(uReport)" to {_p}
+            send "{@line-w}" to {_p}
+            send replace_arg("{@line-w} {@m-other} &7%{ur::lang::update_ver}%", "&c%{ur::version}%&7", "&a%{_ver}%") to {_p}
+            json("%{_p}%", "{@line-w} {@m-other} &7%{ur::lang::update_final}%||ttp:&7&o%{ur::lang::click_update}%||cmd:/ur update download")
+            send "{@line-w}" to {_p}
+            json("%{_p}%", "{@line-w} {@m-other} &f&o%{ur::lang::update_disable}%||ttp:&c&o%{ur::lang::update_click-disable}%||cmd:/ur config disable update_notif")
+            send "{@line-w}" to {_p}
+            send "{@line-d}" to {_p}
+            if {ur::cfg::sounds_all} and {ur::cfg::sounds_update} = true:
+                uReportSounds({_p}, "BLOCK_DISPENSER_DISPENSE", 0.2)
+    else:
+        send " " to {_p}
+        send "{@line-u}" to {_p}
+        send "{@line-w}" to {_p}
+        send "{@line-w} {@m-suc} &e%{ur::lang::updated_latest}% &7~ &6%{ur::version}%" to {_p}
+        json("%{_p}%", "{@line-w} {@m-imp} &f&o%{ur::lang::updated_link}%||url:https://www.spigotmc.org/resources/84010/updates")
+        send "{@line-w}" to {_p}
+        send "{@line-d}" to {_p}
+        if {ur::cfg::sounds_all} and {ur::cfg::sounds_update} = true:
+            uReportSounds({_p}, "BLOCK_DISPENSER_DISPENSE", 0.2)
+
+function uPerm(p: player, t: text, t2: boolean = false) :: boolean:
+    if {_p} is not set:
+        return true
+    set {_t::*} to {_t2} split at "."
+    if {_p} has permission "ur.%{_t}%" or "ur.%{_t}%.*" or "ur.%{_t::1}%.*" or "ur.%{ur::perm::all}%":
+        return true
+    send "{@m-error} &7%{ur::lang::no_perm}%" to {_p}
+    return false
+
+function setUp(t: text = ""):
+    if {_t} = "stop":
+        set {ur::stopsetup} to true
+        delete {ur::setup}
+        set {ur::lang} to "EN"
+        stop
+    if {ur::setup} is not set:
+        wait 1 second
+        set {ur::timezone} to "CET"
+        set {ur::setup} to true
+        delete {ur::stopsetup}
+        loop 30 times:
+            send " " to console
+        filesManager("all")
+        send "%langManager(""dl"", ""EN"")% &e[EN]" to console
+        send "{@m-ur} &aAll required files were created successfully." to console
+        send " " to console
+        send "{@m-ur} Please select your preferred language from this list: &e%langManager(""list"")%" to console
+        send "{@m-ur} Type &e/ur lang set [LANGUAGE] &7to change your preferred language..." to console
+        wait ("%random number between 0 and 1% seconds" parsed as timespan)
+        send "{@m-ur} %{ur::lang::pref_lang}% §e%{ur::lang::lang}%" to console
+        loop 3 times:
+            wait 5 ticks
+            send "{@m-ur} %{ur::lang::setup_cfg_dl1}% %loop-number%)" to console
+            if downloadManager("config", true) = true:
+                send "{@m-ur} &a%{ur::lang::setup_cfg_dl2}%" to console
+                wait 1 second
+                exit loop
+            else if loop-number = 3:
+                send "{@m-ur} &c&l%{ur::lang::setup_cfg_dlerr}%" to console
+                wait 1 second
+        wait 10 ticks
+        send "{@m-ur} %{ur::lang::setup_preparing}%" to console
+        set {ur::version} to getNewVersion()
+        wait ("%random number between 1 and 3% seconds" parsed as timespan)
+        send " " to console
+        send "{@m-ur} %{ur::lang::setup_timezone}% &a%timezone {ur::timezone}'s time%" to console
+        send "{@m-ur} %{ur::lang::setup_timezone2}%" to console
+        send " " to console
+        wait ("%random number between 1 and 2% seconds" parsed as timespan)
+        send "{@m-ur} %{ur::lang::setup_checking_files}%" to console
+        wait 2 ticks
+        loop ("cfg", "logs", "langs", "patches" and "Others"):
+            if filesManager("%loop-value%") = true:
+                send "{@m-ur} &a%{ur::lang::setup_%loop-value%_exists}%" to console
+            else:
+                send "{@m-ur} &c%{ur::lang::setup_%loop-value%_not_exists}%" to console
+            wait 3 ticks
+        loop 6 times:
+            send "{@m-ur} %colored {ur::lang::setup_info%loop-number%}%" to console
+        logAction("set-up")
+        delete {ur::setup}
+
+function createPage(t: objects, amt_per_page: text = "5", page: integer = 0) :: objects:
+    delete {ur::tmp::page::*} and {ur::tmp::pages}
+    set {_amt_per_page} to {_amt_per_page} parsed as integer
+    set {_x} to (size of {_t::*})/{_amt_per_page}
+    set {_am} to ceil({_x})
+    set {ur::tmp::pages} to {_am}
+    set {_x} to 0
+    loop {_am} times:
+        loop (size of {_t::*}) times:
+            add 1 to {_x}
+            if {_x} < {_amt_per_page}:
+                set {ur::tmp::page::%loop-number-1%::%{_t::%loop-number-2%}%} to {_t::%loop-number-2%}
+                delete {_t::%{_t::%loop-number-1%}%}
+            else:
+                set {ur::tmp::page::%loop-number-1%::%{_t::%loop-number-2%}%} to {_t::%loop-number-2%}
+                delete {_t::%loop-number-2%}
+                set {_x} to 0
+                exit loop
+    return {ur::tmp::page::%{_page}%::*}
+
+function uReverse(t: objects, t2: boolean = false) :: objects:
+    if {_t2} = false:
+        set {_s} to size of {_t::*}
+        loop {_s} times:
+            set {_x} to {_s} - loop-number + 1
+            add {_t::%{_x}%} to {_x::*}
+        set {ur::tmp::list::*} to {_x::*}
+        return {ur::tmp::list::*}
+    else:
+        set {_s} to size of {ur::tmp::insert::*}
+        loop {_s} times:
+            set {_x} to {_s} - loop-number + 1
+            add {_t::%{_x}%} to {_x::*}
+        set {ur::tmp::insert::*} to {_x::*}
+
+function helpManager(p: player, t: text = "", page: integer = 1):
+    set {_nodes::*} to skutil yaml nodes with keys "msg" from file "%{ur::paths::langs}%/lang_%{ur::lang}%.yml"
+    if {_t} = "" or "none":
+        set {_head} to "help_a_i_"
+        loop {_nodes::*}:
+            if loop-value contains {_head}:
+                set {_lv} to skutil yaml value "msg.%loop-value%" from file "%{ur::paths::langs}%/lang_%{ur::lang}%.yml"
+                set {_li} to loop-value
+                replace all {_head} with "" in {_li}
+                set {_options::%{_li}%} to {_lv}
+        loop {_options::*}:
+            if loop-index starts with "para":
+                if loop-index doesn't contain "_":
+                    add loop-value to {_para::*}
+        set {_list::*} to createPage({_para::*}, "5", {_page})
+    else:
+        set {_head} to "help_d_i_cmd_%{_t}%_"
+        loop {_nodes::*}:
+            if loop-value contains {_head}:
+                set {_lv} to skutil yaml value "msg.%loop-value%" from file "%{ur::paths::langs}%/lang_%{ur::lang}%.yml"
+                set {_li} to loop-value
+                replace all {_head} with "" in {_li}
+                set {_options::%{_li}%} to {_lv}
+    if (({ur::tmp::pages} >= {_page}) and ({_page} > 0)):
+        loop 25 times:
+            send " " to {_p}
+        send "{@line-u}" to {_p}
+        send "{@line-w}" to {_p}
+        if {_t} = "" or "none":
+            send "{@line-w} %{ur::lang::help_a_ni_title}% &f(%{ur::lang::history_page}% %{_page}%/%{ur::tmp::pages}%)" to {_p}
+            send "{@line-w}" to {_p}
+            send "{@line-w} &7&o%{ur::lang::help_a_i_3}%" to {_p}
+        else:
+            send "{@line-w} %{ur::lang::help_a_i_2}%" to {_p}
+            send "{@line-w}" to {_p}
+        if {_t} = "" or "none":
+            loop {_list::*}:
+                set {_x} to loop-value
+                set {_cmd::*} to {_x} split at " "
+                json("%{_p}%", "{@line-w} {@m-other} %{_x}%||ttp:&7&o%{ur::lang::help_a_ni_click}% %{_cmd::2}%||cmd:/ur help %{_cmd::2}%")
+        else:
+            loop {_options::*}:
+                if loop-value contains "/ur ":
+                    if loop-value doesn't contain "Command:":
+                        set {_x::*} to loop-value split at "->"
+                        set {_lv} to subtext of {_x::1} from characters 6 to (length of {_x::1}-{_num})
+                        if uncolored {_lv} contains uncolored "&":
+                            set {_lv} to subtext of {_lv} from characters 1 to (length of {_lv}-3)
+                        json("%{_p}%", "{@line-w} %loop-value%||ttp:&7&o%{ur::lang::help_a_ni_click2}%||sgt:%{_lv}%")
+                    else:
+                        send "{@line-w} %loop-value%" to {_p}
+                else:
+                    send "{@line-w} %loop-value%" to {_p}
+        send "{@line-w}" to {_p}
+        if {_t} = "" or "none":
+            if {ur::tmp::pages} > 1:
+                json("%{_p}%", "{@line-w}        &7[%{ur::lang::prev_page}%]||cmd:/ur help %{_page} -1%||&7               [%{ur::lang::next_page}%]||cmd:/ur help %{_page} +1%")
+                send "{@line-w}" to {_p}
+        else if {_page} != -1:
+            json("%{_p}%", "{@line-w} {@m-other} &7&o%{ur::lang::help_a_ni_back}%||cmd:/ur help %{_page}%")
+            send "{@line-w}" to {_p}
+        send "{@line-d}" to {_p}
+
+function configManager(t: text = "", t2: text = "", t3: text = "", t4: text = "", t5: text = "") :: boolean:
+    set {_p} to {_t2} parsed as player
+    if {_t} = "menu":
+        openMenu({_p}, 3, "%{ur::lang::config_manager}% - %{ur::lang::config_menu}%")
+        set {_tmp::*} to enchanting table, paper, compass and glowing feather
+        set {_c} to 1
+        loop ("updates", "logs", "URL" and "other"):
+            set {_x::%{_c}%} to {_tmp::%{_c}%}
+            set {_y::%{_c}%} to "&7%{ur::lang::config_manage}% &6%{ur::lang::config_%loop-value%}%"
+            set {_z::%{_c}%} to loop-value
+            add 1 to {_c}
+        loop 6 times:
+            set {_ln} to loop-number +8
+            set {_ln1} to loop-number -1
+            format gui slot {_ln} of {_p} with {_x::%{_ln1}%} named {_y::%{_ln1}%} to run function configManager("page", "%{_p}%", "%{_z::%{_ln1}%}%")
+    else if {_t} = "page":
+        set {_nodes::*} to skutil yaml nodes with keys "cfg" from file "%{ur::paths::ur}%/config.yml"
+        loop {_nodes::*}: 
+            if loop-value != "passwd":
+                if loop-value contains "update":
+                    if loop-value doesn't contain "logs":
+                        add loop-value to {_updates::*}
+                        remove loop-value from {_nodes::*}
+                if loop-value contains "logs":
+                    add loop-value to {_logs::*}
+                    remove loop-value from {_nodes::*}
+                if loop-value contains "URL_":
+                    add loop-value to {_URL::*}
+                    remove loop-value from {_nodes::*}
+            else:
+                remove loop-value from {_nodes::*}
+        set {_other::*} to {_nodes::*}
+        set {_list::*} to {_%{_t3}%::*}
+        open virtual chest with size 5 named "%{ur::lang::config_manage}% %{ur::lang::config_%{_t3}%}%" to {_p}
+        loop 9*5 times:
+            format gui slot loop-number -1 of {_p} with ("iron bar" parsed as itemtype) named " "
+            set {_n} to loop-number - 1
+            if {_n} is between 10 and 16:
+                add {_n} to {_nums::*}
+            else if {_n} is between 19 and 25:
+                add {_n} to {_nums::*}
+            else if {_n} is between 28 and 34:
+                add {_n} to {_nums::*}
+        loop {_nums::*}:
+            format gui slot loop-value of {_p} with black stained glass pane named " "
+        set {_counter} to 0
+        loop {_list::*}:
+            add 1 to {_counter}
+            set {_item} to red stained glass pane
+            set {_name} to "&c%{ur::lang::config_name_%loop-value%}%"
+            set {_res} to getStatus("%loop-value%")
+            set {_lore::*} to replace_arg("&7%{ur::lang::config_current_value}%%{ur::lang::config_lore_%loop-value%}%", "&c%{_res}%&7") split at "$$"
+            if {_res} = "true":
+                set {_item} to green stained glass pane
+                set {_name} to "&a%{ur::lang::config_name_%loop-value%}%"
+                set {_lore::*} to replace_arg("&7%{ur::lang::config_current_value}%%{ur::lang::config_lore_%loop-value%}%", "&a%{_res}%&7") split at "$$"
+            else if {_res} != "true" or "false":
+                set {_item} to yellow stained glass pane
+                set {_name} to "&e%{ur::lang::config_name_%loop-value%}%"
+                set {_lore::*} to replace_arg("&7%{ur::lang::config_current_value}%%{ur::lang::config_lore_%loop-value%}%", "&e%{_res}%&7") split at "$$"
+            replace all "{mark}" with "{@m-other} " in {_lore::*}
+            if "%{_lore::5}%" contains "<none>":
+                set {_lore::5} to "{@m-other} &7%{ur::lang::config_not_found_desc}%"
+            format gui slot {_nums::%{_counter}%} of {_p} with {_item} named {_name} with lore {_lore::*} to run function configManager("toggle", "%loop-value%", "-true", "%{_p}%", "%{_t3}%")
+        format gui slot 9*5-1 of {_p} with glowing clock named "&e%{ur::lang::config_reload}%" to close then execute {_p} command "/ur cfg reload"
+        format gui slot 9*5-9 of {_p} with glowing arrow named "&7%{ur::lang::config_back}%" to run function configManager("menu", "%{_p}%")
+    else if {_t} = "toggle":
+        set {_p} to {_t4}
+        set {_x} to skutil yaml value "cfg.%{_t2}%" from file "%{ur::paths::ur}%/config.yml"
+        if {_x} = true:
+            set skutil yaml value "cfg.%{_t2}%" from file "%{ur::paths::ur}%/config.yml" to false
+            if {_t3} = "-true":
+                configManager("page", "%{_p}%", "%{_t5}%")
+            return false
+        else if {_x} = false:
+            set skutil yaml value "cfg.%{_t2}%" from file "%{ur::paths::ur}%/config.yml" to true
+            if {_t3} = "-true":
+                configManager("page", "%{_p}%", "%{_t5}%")
+            return true
+        else:
+            close ({_p} parsed as player)'s inventory
+            send "{@m-info} &7%{ur::lang::config_input_value}%" to ({_p} parsed as player)
+            set {ur::%{_p}%::input} to true
+            loop 15 times:
+                if {ur::%{_p}%::input} != true:
+                    exit loop
+                else:
+                    wait 1 seconds
+            if {ur::%{_p}%::input-val} is set:
+                set skutil yaml value "cfg.%{_t2}%" from file "%{ur::paths::ur}%/config.yml" to {ur::%{_p}%::input-val}
+                configManager("page", "%{_p}%", "%{_t5}%")
+                delete {ur::%{_p}%::input-val}
+            else:
+                send "{@m-imp} %{ur::lang::config_timed_out}%" to {_p} parsed as player            
+    else if {_t} = "check":
+        if skutil yaml path "cfg.%{_t2}%" in file "%{ur::paths::ur}%/config.yml" doesn't exist:
+            send "{@m-error} %{ur::lang::config_path_not_exist}%" to {_t3} parsed as player
+            return false
+        return true
+
+function getStatus(t: text) :: text:
+    set {_s} to skutil yaml value "cfg.%{_t}%" from file "%{ur::paths::ur}%/config.yml"
+    set {_s} to "%{_s}%"
+    return {_s}
+
+function openMenu(p: player, size: integer = 3, title: text = "", unc: boolean = false, opt: boolean = false):
+    if {_unc} = true:
+        set {_title} to uncolored {_title}
+    open virtual chest with size {_size} named {_title} to {_p}
+    loop 9*{_size} times:
+        set {_num} to loop-number -1
+        format gui slot {_num} of {_p} with ("iron bar" parsed as itemtype) named " "
+    if {_opt} = false:
+        loop {ur::other::numbers::*}:
+            format gui slot loop-value of {_p} with black stained glass pane named " "
+    loop 9 times:
+        format gui slot 9*{_size}-loop-number of {_p} with ("iron bar" parsed as itemtype) named " "
+
+function uReportSounds(p: player, t: text = "ENTITY_EXPERIENCE_ORB_PICKUP", num: number = 0.3):
+    play raw sound "%{_t}%" at {_p} with pitch 1 volume {_num}
+
+function createID(t: text = "") :: text:
+    set {_digs} to {ur::cfg::id_length} parsed as integer
+    set {_min} to 10*{_digs}
+    loop {_digs} times:
+        if {_max} is not set:
+            set {_max} to "9"
+        else:
+            set {_max} to "%{_max}%9"
+    set {_max} to {_max} parsed as integer
+    set {_id} to random integer between {_min} and {_max}
+    return "%{_id}%"
+
+function createCase(p: text, t: text = "", silent: boolean = false) :: text:
+    if (({ur::cfg::id_length} parsed as integer) >= {@id-min}) and (({ur::cfg::id_length} parsed as integer) <= {@id-max}):
+        loop 1000 times:
+            set {_id} to createID()
+            if (length of "%{_id}%") = ({ur::cfg::id_length} parsed as integer):
+                if {ur::rep-id::*} doesn't contain "%{_id}%":
+                    set {_pass} to true
+                    exit loop
+        if {_pass} = true:
+            set {ur::rep::%{_id}%::name} to replace_arg({ur::lang::report_menu}, "%{_id}%")
+            set {ur::rep::%{_id}%::user} to {_p}
+            set {ur::rep::%{_id}%::status} to "1"
+            if {ur::p::%{_p}%::tmp::rep::%{_t}%::type} is set:
+                set {ur::rep::%{_id}%::type} to uncolored {ur::p::%{_p}%::tmp::rep::%{_t}%::type}
+            else:
+                set {ur::rep::%{_id}%::type} to {ur::lang::report_a_no_type}
+            set {ur::rep::%{_id}%::report} to {_t}
+            if {ur::rep::%{_id}%::report} != "player":
+                set {ur::rep::%{_id}%::priority} to uncolored {ur::p::%{_p}%::tmp::rep::%{_t}%::priority}
+            else:
+                set {ur::rep::%{_id}%::priority} to {ur::lang::report_a_no_priority}
+                set {ur::rep::%{_id}%::player} to uncolored {ur::p::%{_p}%::tmp::rep::%{_t}%::player}
+            loop ("desc" and "link"):
+                if (size of {ur::p::%{_p}%::tmp::rep::%{_t}%::%loop-value%::*}) > 0:
+                    loop {ur::p::%{_p}%::tmp::rep::%{_t}%::%loop-value%::*}:
+                        if {_x::%loop-value-1%} is not set:
+                            set {_x::%loop-value-1%} to loop-value-2
+                        else:
+                            set {_x::%loop-value-1%} to "%{_x::%loop-value-1%}%@@%loop-value-2%"
+                    set {ur::rep::%{_id}%::%loop-value%} to uncolored {_x::%loop-value%}
+            add "%{_id}%" to {ur::rep-id::*}
+            add "%{_id}%" to {ur::p::%{ur::rep::%{_id}%::user}%::rep::*}
+            if {_silent} = false:
+                notifyManager("%{_p}%", "newrep", "%{_id}%", "-perm:'%{ur::perm::new_report_notif}%'")
+            return "%{_id}%"
+        return "false"
+    notifyManager("%{_p}%", "err", "E001", "-ops-console-perm:'%{ur::perm::errors}%'")
+    return "false"
+
+function notifyManager(p: text, t: text = "", t2: text = "", param: text = ""):
+    set {_c} to "&e"
+    if {_t} starts with "err":
+        set {_c} to "&c"
+    add "{@line-u}" to {_message::*}
+    add "{@line-w} " to {_message::*}
+    if {_t} = "err" or "error":
+        set {_details} to skutil yaml value "msg.error_%{_t2}%" from file "%{ur::paths::langs}%/lang_%{ur::lang}%.yml"
+        if {_t2} = "E001":
+            set {_details} to replace_arg({_details}, "{@id-min}", "{@id-max}", {ur::cfg::id_length})
+        add "{@line-w} %colored {ur::lang::error_occured}%" to {_message::*}
+        if ({_p} parsed as player) is online:
+            add "{@line-w} &7%{ur::lang::error_player}%: &c%{_p}%" to {_message::*}
+        add "{@line-w} &7%colored {ur::lang::error_id_code}%: &c%{_t2}%" to {_message::*}
+        add "{@line-w} &c%{ur::lang::error_details}%: &7%colored {_details}%" to {_message::*}
+    else if {_t} = "err-p":
+        set {_details} to skutil yaml value "msg.error_%{_t2}%" from file "%{ur::paths::langs}%/lang_%{ur::lang}%.yml"
+        add "{@line-w} {@m-imp} &7%{ur::lang::error_E000}%" to {_message::*}
+        add "{@line-w} {@m-imp} &7%colored {ur::lang::error_id_code}%: &c%{_t2}%" to {_message::*}
+        add "{@line-w} {@m-imp} &c%{ur::lang::error_details}%: &7%colored {_details}%" to {_message::*}
+    else if {_t} = "newrep":
+        add "{@line-w} &7%colored {ur::lang::new_report_1}%" to {_message::*}
+        set {_online2} to "&c"
+        if ({ur::rep::%{_t2}%::user} parsed as player) is online:
+            set {_online2} to "&a"
+        if uncolored {ur::rep::%{_t2}%::report} = "player":
+            set {_online} to "&c"
+            if ("%{ur::rep::%{_t2}%::player}%" parsed as player) is online:
+                set {_online} to "&a"
+            set {_r} to replace_arg({ur::lang::new_report_2_1}, "%{_online}%%{ur::rep::%{_t2}%::player}%", {_t2}, "%{_online2}%%{ur::rep::%{_t2}%::user}%")
+        else if {ur::rep::%{_t2}%::priority} is set:
+            set {_r} to replace_arg({ur::lang::new_report_2_2}, {ur::rep::%{_t2}%::priority}, {_t2}, "%{_online2}%%{ur::rep::%{_t2}%::user}%")
+        add "{@line-w} &7%{_r}%" to {_message::*}
+        add "json: {@line-w} {@m-other} &7&o%{ur::lang::new_report_3}%||ttp:&7&o%{ur::lang::report_click_here}%||cmd:/ur id %{_t2}% manage" to {_message::*}
+    else if {_t} = "status_change":
+        add replace_arg("{@line-w} %{ur::lang::report_a_report_updated}%", {_t2}) to {_message::*}
+        add replace_arg("{@line-w} {@m-imp} %{ur::lang::report_a_status_changed}% &6%{ur::lang::report_status_%{ur::rep::%{_t2}%::status}%}%", "%{ur::rep::%{_t2}%::admin}%") to {_message::*}
+    else if {_t} = "delrep":
+        add "{@line-w} {@m-imp} &o%{ur::lang::report_a_report_deleted1}%" to {_message::*}
+        add replace_arg("{@line-w} %{ur::lang::report_a_report_deleted2}%", "&6##%{_t2}%&e") to {_message::*}
+    add "{@line-w} " to {_message::*}
+    add "{@line-d}" to {_message::*}
+    loop {_message::*}:
+        set {_v} to loop-value
+        replace all "json: " with "" in {_v}
+        if {_param} contains "-ops":
+            loop all ops:
+                json("%loop-value-2%", "%{_v}%")
+        if {_param} contains "-console":
+            send {_v} to console
+        if {_param} contains "-player":
+            if ({_p} parsed as player) is online:
+                json("%{_p}%", "%{_v}%")
+        if {_param} contains "-perm:'":
+            set {_x::*} to {_param} split at "-perm:'"
+            replace all "'" with "" in {_x::2}
+            loop all players where [input has permission "%{ur::perm::%{_x::2}%}%"]:
+                if {_t} = "newrep":
+                    if {ur::cfg::sounds_all}, {ur::cfg::sounds_status_change} = true: #and {ur::p::%loop-player%::perm::sounds_all} = true:
+                        uReportSounds(loop-player, "BLOCK_DISPENSER_DISPENSE", 0.2)
+                json("%loop-player%", "%{_v}%")
+
+function uReportFormatter(p: player, t: text = "", id: text = "", params: text = "") :: objects:
+    if {_t} = "repinfo":
+        set {_b} to "&f &7&l» &e"
+        set {_lore::1} to " "
+        set {_o} to "&c"
+        if ({ur::rep::%{_id}%::user} parsed as player) is online:
+            set {_o} to "&a"
+        add "%{_b}%%{ur::lang::report_reporter}%: %{_o}%%{ur::rep::%{_id}%::user}%" to {_lore::*}
+        if {ur::rep::%{_id}%::report} = "player":
+            set {_o} to "&c"
+            if ("%{ur::rep::%{_id}%::player}%" parsed as player) is online:
+                set {_o} to "&a"
+            add "%{_b}%%{ur::lang::report_reported}%: %{_o}%%{ur::rep::%{_id}%::player}%" to {_lore::*}
+        else:
+            add "%{_b}%%{ur::lang::report_priority}%: &6%{ur::rep::%{_id}%::priority}%" to {_lore::*}
+        set {_x1} to replace_arg({ur::lang::report_status_%{ur::rep::%{_id}%::status}%}, {ur::rep::%{_id}%::admin})
+        add "%{_b}%%{ur::lang::report_category}%: %{ur::lang::report_type_%{ur::rep::%{_id}%::report}%}% &7[&6%{ur::rep::%{_id}%::type}%&7]" to {_lore::*}
+        add "%{_b}%%{ur::lang::report_status}%: &6%{_x1}%" to {_lore::*}
+        if {ur::rep::%{_id}%::desc} is not set:
+            add " %{ur::lang::report_np}% %{ur::lang::report_description}%" to {_lore::*}
+        else:
+            add " %{ur::lang::report_p}% %{ur::lang::report_description}%" to {_lore::*}
+        if {ur::rep::%{_id}%::link} is not set:
+            add " %{ur::lang::report_np}% %{ur::lang::report_links}%" to {_lore::*}
+        else:
+            add " %{ur::lang::report_p}% %{ur::lang::report_links}%" to {_lore::*}
+        if {_params} doesn't contain "short":
+            add " " to {_lore::*}
+            loop ("leftclick", "rightclick" and "middleclick"):
+                add "&7&o ∫%{ur::lang::report_%loop-value%}%" to {_lore::*}
+        return {_lore::*}
+    else if {_t} starts with "priority":
+        replace all "priority:" with "" in {_t}
+        loop 5 times:
+            set {_x::*} to {ur::lang::report_priority_%loop-number%} split at "$$"
+            delete {_item}
+            set {_name} to {_x::1}
+            set {_lore} to {_x::2}
+            delete {_x::*}
+            set {_x::*} to {_lore} split at " >item:"
+            set {_lore} to {_x::1}
+            set {_item} to {_x::2} parsed as itemtype
+            if {_item} is not set:
+                set {_item} to barrier block
+            replace all "{mark}" with "{@m-other}" in {_lore}
+            set {_lore::*} to {_lore} split at "^^"
+            if {_id} = "":
+                if uncolored {ur::p::%{_p}%::tmp::rep::%{_t}%::priority} = uncolored {_name}:
+                    set {_item} to glowing {_item}
+                format gui slot {_num}+10 of {_p} with {_item} named {_name} with lore {_lore::*} to run function uReport({_p}, "set", "priority", "%{_name}%", {_t})
+            else:
+                if uncolored {ur::rep::%{_id}%::priority} = uncolored {_name}:
+                    set {_item} to glowing {_item}
+                format gui slot {_num}+10 of {_p} with {_item} named {_name} with lore {_lore::*} to run function uReportManager({_id}, "%{_p}%", "priority", "%{_name}%")
+            add 1 to {_num}
+    else if {_t} starts with "type":
+        replace all "type:" with "" in {_t}
+        set {_num} to 0
+        loop 100 times:
+            set {_t3} to {_t}
+            if {_id} != "":
+                set {_t3} to {ur::rep::%{_id}%::report}
+            if {ur::lang::report_type_%{_t3}%_%loop-number%} is set:
+                set {_x::*} to {ur::lang::report_type_%{_t3}%_%loop-number%} split at " >item:"
+                delete {_item}
+                set {_item} to {_x::2} parsed as itemtype
+                if {_item} is not set:
+                    set {_item} to barrier block
+                if {_id} = "":
+                    if {ur::p::%{_p}%::tmp::rep::%{_t3}%::type} = {_x::1}:
+                        set {_item} to glowing {_item}
+                    format gui slot {_num}+10 of {_p} with {_item} named "&6%{_num}+1%. &e%{_x::1}%" to run function uReport({_p}, "set", "type", {_x::1}, {_t})
+                else:
+                    if {ur::rep::%{_id}%::type} = {_x::1}:
+                        set {_item} to glowing {_item}
+                    format gui slot {_num}+10 of {_p} with {_item} named "&6%{_num}+1%. &e%{_x::1}%" to run function uReportManager({_id}, "%{_p}%", "type", {_x::1})
+                add 1 to {_num}
+            else:
+                exit loop
+
+function uReport(p: player, t: text = "", t2: text = "", t3: text = "", t4: text = ""):
+    set {ur::p::%{_p}%::tmp::anti-close} to true
+    if {_t} = "menu":
+        openMenu({_p}, 3, "%{ur::lang::report_title}%")
+        set {_item::*} to ("player head" parsed as itemtype), redstone dust, book, diamond and glowing feather
+        set {_c} to 0
+        set {_slot::*} to 10, 11, 12, 13 and 16
+        loop {@types}:
+            add 1 to {_c}
+            format gui slot {_slot::%{_c}%} of {_p} with {_item::%{_c}%} named "&7%{ur::lang::report_type_%loop-value%}%" to run function uReport({_p}, "window-main", "%loop-value%")
+    else if {_t} = "window-main":
+        openMenu({_p}, 3, "%{ur::lang::report_specify}%")
+        set {_y} to "&a✓"
+        set {_n} to "&c✘"
+        format gui slot 9*3-9 of {_p} with glowing arrow named "&7%{ur::lang::report_go_back}%" to run function uReport({_p}, "menu")
+        set {_item} to red stained glass pane
+        set {_color} to "%{_n}% |"
+        set {_lore::*} to " " and "%{_color}% &7&o%{ur::lang::report_submit_no}%"
+        set {_slot-t} to 10 # slot with which we start filling menu
+        set {_req} to 2 # required to submit report
+        set {_submit} to true
+        if {_t2} = "bug" or "account":
+            set {_req} to 3
+        # --- SELECTIVE ---
+        if {_t2} is "player":
+            if {ur::p::%{_p}%::tmp::rep::player::player} is not set:
+                set {_submit} to false
+                format gui slot 10 of {_p} with ("player head" parsed as itemtype) named "%{_n}% | %{ur::lang::report_select_player}%" to run function uReport({_p}, "select", "player")
+            else:
+                set {_online} to "&4"
+                if ("%{ur::p::%{_p}%::tmp::rep::player::player}%" parsed as player) is online:
+                    set {_online} to "&2"
+                format gui slot 10 of {_p} with skull of ({ur::p::%{_p}%::tmp::rep::player::player} parsed as offlineplayer) named "%{_y}% | %{ur::lang::report_selected_player}% %{_online}%%{ur::p::%{_p}%::tmp::rep::player::player}%" to run function uReport({_p}, "select", "player")
+            add 1 to {_slot-t}
+        else if {_t2} is "bug", "account", "payment" or "other":
+            if {ur::p::%{_p}%::tmp::rep::%{_t2}%::priority} is not set:
+                set {_submit} to false
+                format gui slot 10 of {_p} with redstone torch named "%{_n}% | %{ur::lang::report_select_priority}%" to run function uReport({_p}, "select", "priority", {_t2})
+            else:
+                format gui slot 10 of {_p} with torch named "%{_y}% | %{ur::lang::report_selected_priority}% %{ur::p::%{_p}%::tmp::rep::%{_t2}%::priority}%" to run function uReport({_p}, "select", "priority", {_t2})
+            add 1 to {_slot-t}
+        # ----- GENERAL -----
+        # --- TYPE ---
+        if {_t2} != "other":
+            if {ur::p::%{_p}%::tmp::rep::%{_t2}%::type} is not set:
+                set {_submit} to false
+                format gui slot {_slot-t} of {_p} with paper named "%{_n}% | %{ur::lang::report_select_type}%" to run function uReport({_p}, "select", "type", "%{_t2}%")
+                add 1 to {_slot-t}
+            else:
+                format gui slot {_slot-t} of {_p} with glowing paper named "%{_y}% | %{ur::lang::report_selected_type}% &e%{ur::p::%{_p}%::tmp::rep::%{_t2}%::type}%" to run function uReport({_p}, "select", "type", {_t2})
+                add 1 to {_slot-t}
+        # --- DESCRIPTION ---
+        if {ur::p::%{_p}%::tmp::rep::%{_t2}%::desc} is not set:
+            if {_t2} != "player":
+                set {_submit} to false
+            format gui slot {_slot-t} of {_p} with ("book and quill" parsed as itemtype) named "%{_n}% | %{ur::lang::report_desc}%" to run function uReport({_p}, "select", "desc", {_t2})
+            add 1 to {_slot-t}
+        else:
+            format gui slot {_slot-t} of {_p} with glowing ("book and quill" parsed as itemtype) named "%{_y}% | %{ur::lang::report_desc}%" with lore ("", "{@m-other} &6&o%{ur::lang::report_your_desc}%" and {ur::p::%{_p}%::tmp::rep::%{_t2}%::desc::*}) to run function uReport({_p}, "select", "link", {_t2})
+            add 1 to {_slot-t}
+        # --- LINKS TO SCREENSHOTS ---
+        if (size of {ur::p::%{_p}%::tmp::rep::%{_t2}%::link::*}) <= 0:
+            format gui slot {_slot-t} of {_p} with ("tripwire hook" parsed as itemtype) named "%{_n}% | %{ur::lang::report_link}%" to run function uReport({_p}, "select", "link", {_t2})
+            add 1 to {_slot-t}
+        else:
+            set {_links::*} to {ur::p::%{_p}%::tmp::rep::%{_t2}%::link::*}
+            loop {_links::*}:
+                set {_links::%loop-index%} to "&7- &e&o%loop-value%"
+            format gui slot {_slot-t} of {_p} with glowing ("tripwire hook" parsed as itemtype) named "%{_y}% | %{ur::lang::report_link}%" with lore ("", "{@m-other} &6&o%{ur::lang::report_your_links}%" and {_links::*}) to run function uReport({_p}, "select", "link", {_t2})
+            add 1 to {_slot-t}
+        # ----- REQUIREMENTS -----
+        if {_submit} = true:
+            set {ur::p::%{_p}%::tmp::rep::%{_t2}%::submit} to true
+            set {_item} to green stained glass pane
+            set {_color} to "%{_y}% |"
+            set {_lore::*} to " " and "%{_color}% &7&o%{ur::lang::report_submit_yes}%"
+        format gui slot 9*3-1 of {_p} with {_item} named "%first 2 characters of {_color}% %{ur::lang::report_submit}%" with lore {_lore::*} to run function uReport({_p}, "submit", {_t2})
+    else if {_t} = "submit":
+        set {_id} to createCase("%{_p}%", {_t2})
+        close {_p}'s inventory
+        #notifyManager("%{_p}%", "err", "E002", "-console-perm:'%{ur::perm::errors}%'")
+        #notifyManager("%{_p}%", "err-p", "E002", "-player")
+        if {_id} = "false":
+            send "{@m-imp} &7&o%{ur::lang::processing}%" to {_p}
+            loop 3 times:
+                set {_id} to createCase("%{_p}%", {_t2})
+                if {_id} != "false":
+                    exit loop
+                else if loop-number = 3:
+                    set {_notif} to true
+                    exit loop
+            if {_notif} = true:
+                notifyManager("%{_p}%", "err", "E002", "-console-perm:'%{ur::perm::errors}%'")
+                notifyManager("%{_p}%", "err-p", "E002", "-player")
+                stop
+        delete {ur::p::%{_p}%::tmp::rep::*}
+        set {_admins} to 0
+        loop all players where [input has permission "%{ur::perm::rep_manage}%"]:
+            add 1 to {_admins}
+        set {_x} to replace_arg({ur::lang::report_created}, "%{_id}%")
+        set {_y} to replace_arg({ur::lang::report_admins}, "%{_admins}%")
+        if {_p} has permission "%{ur::perm::new_report_notif}%" or "%{ur::perm::all}%":
+            add 0 to {_}
+        else:
+            send "{@line-u}" to {_p}
+        send "{@line-w} " to {_p}
+        send "{@line-w} {@m-suc} %{_x}%" to {_p}
+        send "{@line-w} {@m-imp} &7%{_y}%" to {_p}
+        send "{@line-w} " to {_p}
+        send "{@line-d}" to {_p}
+        uReportRefresh("%{_p}%")
+    else if {_t} = "set":
+        if {_t2} = "type":
+            set {ur::p::%{_p}%::tmp::rep::%{_t4}%::type} to {_t3}
+        else if {_t2} = "priority":
+            set {ur::p::%{_p}%::tmp::rep::%{_t4}%::priority} to {_t3}
+        uReport({_p}, "window-main", {_t4})
+    else if {_t} = "select":
+        if {_t2} = "player":
+            set {ur::p::%{_p}%::tmp::rep::submit-submit} to true
+            close {_p}'s inventory
+            send "{@m-info} &7%{ur::lang::report_send_player}%" to {_p}
+            send "{@m-imp} &7%{ur::lang::report_send_cancel}%" to {_p}
+            set {ur::p::%{_p}%::lock-cmd} to true
+            loop 15 times:
+                if loop-number = 15:
+                    send "{@m-imp} &7%{ur::lang::report_time_out}%" to {_p}
+                    uReport({_p}, "window-main", "player")
+                    delete {ur::p::%{_p}%::tmp::rep::submit-submit} and {ur::p::%{_p}%::lock-cmd}
+                if {ur::p::%{_p}%::tmp::rep::submit-submit} = true:
+                    wait 1 second
+                else:
+                    delete {ur::p::%{_p}%::lock-cmd}
+                    stop
+        else if {_t2} = "type":
+            openMenu({_p}, 3, "%{ur::lang::report_select_type}%")
+            uReportFormatter({_p}, "type:%{_t3}%")
+            format gui slot 9*3-9 of {_p} with glowing arrow named "&7%{ur::lang::report_go_back}%" to run function uReport({_p}, "window-main", "%{_t3}%")
+        else if {_t2} = "priority":
+            openMenu({_p}, 3, "%{ur::lang::report_select_priority}%")
+            uReportFormatter({_p}, "priority:%{_t3}%")
+            format gui slot 9*3-9 of {_p} with glowing arrow named "&7%{ur::lang::report_go_back}%" to run function uReport({_p}, "window-main", "%{_t3}%")
+        else if {_t2} = "desc":
+            set {ur::p::%{_p}%::tmp::rep::submit-desc} to {_t3}
+            close {_p}'s inventory
+            send "{@m-info} &7%{ur::lang::report_send_desc}%" to {_p}
+            send "{@m-imp} &7%{ur::lang::report_send_cancel}%" to {_p}
+            set {ur::p::%{_p}%::lock-cmd} to true
+            loop 45 times:
+                if loop-number = 45:
+                    send "{@m-imp} &7%{ur::lang::report_time_out}%" to {_p}
+                    uReport({_p}, "window-main", {_t3})
+                    delete {ur::p::%{_p}%::tmp::rep::submit-desc} and {ur::p::%{_p}%::lock-cmd}
+                if {ur::p::%{_p}%::tmp::rep::submit-desc} = {_t3}:
+                    wait 1 second
+                else:
+                    delete {ur::p::%{_p}%::lock-cmd}
+                    stop
+        else if {_t2} = "link":
+            set {ur::p::%{_p}%::tmp::rep::submit-link} to {_t3}
+            close {_p}'s inventory
+            send "{@m-info} &7%{ur::lang::report_send_link}%" to {_p}
+            if {ur::cfg::URL_whitelist} = true:
+                send "{@m-imp} &7%{ur::lang::report_send_link_wl}%" to {_p}
+                set {_x::*} to yaml list "URL_whitelist" from file "%{ur::paths::ur}%/config.yml"
+                loop {_x::*}:
+                    if {_y} is not set:
+                        set {_y} to "&e%loop-value%&7"
+                    else:
+                        set {_y} to "&e%{_y}%&7, &e%loop-value%"
+                send "{@m-other} %{_y}%" to {_p}
+            send "{@m-imp} &7%{ur::lang::report_send_cancel}%" to {_p}
+            set {ur::p::%{_p}%::lock-cmd} to true
+            loop 45 times:
+                if loop-number = 45:
+                    send "{@m-imp} &7%{ur::lang::report_time_out}%" to {_p}
+                    uReport({_p}, "window-main", {_t3})
+                    delete {ur::p::%{_p}%::tmp::rep::submit-link} and {ur::p::%{_p}%::lock-cmd}
+                if {ur::p::%{_p}%::tmp::rep::submit-link} = {_t3}:
+                    wait 1 second
+                else:
+                    delete {ur::p::%{_p}%::lock-cmd}
+                    stop
+
+function uReportAdmin(p: player, id: text = "", t: text = "", t2: text = ""):
+    if {ur::rep::%{_id}%::status} is not set:
+        if {_t} != "reports":
+            send "{@m-imp} %{ur::lang::report_a_no_report}%" to {_p}
+            stop
+    if {_t} = "":
+        openMenu({_p}, 3, replace_arg({ur::lang::report_menu}, {_id}), true)
+        set {_lore::*} to uReportFormatter({_p}, "repinfo", {_id})
+        format gui slot 13 of {_p} with ({ur::cfg::rep_status_%{ur::rep::%{_id}%::status}%} parsed as itemtype) named replace_arg({ur::lang::report_menu}, {_id}) with lore {_lore::*}
+    else if {_t} = "manage":
+        openMenu({_p}, 4, replace_arg({ur::lang::report_menu}, {_id}), true)
+        set {_x::*} to {ur::rep::%{_id}%::desc} split at "@@"
+        if (size of {_x::*}) > 0:
+            loop {_x::*}:
+                add "&7&o%loop-value%" to {_desc::*}
+        else:
+            add "&c→ %{ur::lang::report_np}%" to {_desc::*}
+        set {_y::*} to {ur::rep::%{_id}%::link} split at "@@"
+        loop {_y::*}:
+            add "{@m-other} &6&o%loop-value%" to {_link::*}
+        if (size of {_link::*}) > 0:
+            add " " and "&7&o ∫ %{ur::lang::report_a_click_links}%" to {_link::*}
+        else:
+            add "&c→ %{ur::lang::report_np}%" to {_link::*}
+        set {_lore::*} to uReportFormatter({_p}, "repinfo", {_id}, "short")
+        format gui slot 0 of {_p} with ({ur::cfg::rep_status_%{ur::rep::%{_id}%::status}%} parsed as itemtype) named replace_arg({ur::lang::report_menu}, "%{_id}% &e- %{ur::lang::report_a_info}%") with lore {_lore::*}
+        format gui slot 10 of {_p} with redstone torch named "&e%{ur::lang::report_a_priority}%" with lore "{@m-other} &7&o%{ur::lang::report_a_curr_priority}% &6&o%{ur::rep::%{_id}%::priority}%" to run function uReportAdmin({_p}, {_id}, "priority")
+        format gui slot 11 of {_p} with paper named "&e%{ur::lang::report_a_type}%" with lore "{@m-other} &7&o%{ur::lang::report_a_curr_type}% &6&o%{ur::rep::%{_id}%::type}%" to run function uReportAdmin({_p}, {_id}, "type")
+        format gui slot 12 of {_p} with ("book and quill" parsed as itemtype) named "&e%{ur::lang::report_a_desc}%" with lore {_desc::*}
+        format gui slot 13 of {_p} with tripwire hook named "&e%{ur::lang::report_a_links}%" with lore {_link::*} to run function uReportAdmin({_p}, {_id}, "links")
+        format gui slot 19 of {_p} with glowing name tag named "&e%{ur::lang::report_a_status}%" with lore replace_arg("{@m-other} &7&o%{ur::lang::report_a_curr_status}% &6&o%{ur::lang::report_status_%{ur::rep::%{_id}%::status}%}%", {ur::rep::%{_id}%::admin}) to run function uReportAdmin({_p}, {_id}, "status")
+        format gui slot 20 of {_p} with glowing anvil named "&e%{ur::lang::report_a_history}%" to run function uReportAdmin({_p}, {_id}, "history")
+        format gui slot 21 of {_p} with glowing ender pearl named "&e%{ur::lang::report_a_teleport}%" to run function uReportAdmin({_p}, {_id}, "teleport")
+        format gui slot 22 of {_p} with glowing feather named "&e%{ur::lang::report_a_chat}%" to run function uReportAdmin({_p}, {_id}, "chat")
+        format gui slot 23 of {_p} with glowing end portal frame named "&e%{ur::lang::report_a_prize}%"
+        format gui slot 9*4-1 of {_p} with glowing blaze powder named "&e%{ur::lang::report_a_delete}%" to run function uReportAdmin({_p}, {_id}, "delete")
+        format gui slot 9*4-9 of {_p} with glowing arrow named "&7%{ur::lang::report_go_back}%" to run function uReportAdmin({_p}, "", "reports", "%{ur::p::%{_p}%::page}%")
+    else if {_t} = "status":
+        openMenu({_p}, 3, replace_arg({ur::lang::report_a_menu_status}, {_id}), true)
+        loop 5 times:
+            set {_item} to {ur::cfg::rep_status_%loop-number%} parsed as itemtype
+            if "%{ur::rep::%{_id}%::status}%" = "%loop-number%":
+                set {_item} to glowing {_item}
+            format gui slot loop-number+9 of {_p} with {_item} named replace_arg({ur::lang::report_status_%loop-number%}, "%{_p}%") to run function uReportManager({_id}, "%{_p}%", "status", "%loop-number%", "status")
+        set {_arrow} to true
+    else if {_t} = "history":
+        openMenu({_p}, 3, replace_arg({ur::lang::report_a_menu_history}, {_id}), true)
+        if (size of {ur::rep::%{_id}%::history::*}) > 0:
+            set {_x::*} to uReverse({ur::rep::%{_id}%::history::*})
+            set {_lore::1} to " "
+            loop {_x::*}:
+                if (loop-index parsed as integer) <= 5:
+                    set {_val} to uReportHistory({_id}, {_p}, "get", loop-index, "menu:true")
+                    add "&7%loop-index%. %{_val}%" to {_lore::*}
+            if (size of {ur::rep::%{_id}%::history::*}-5) > 0:
+                set {_x} to replace_arg({ur::lang::report_history_more}, "%size of {ur::rep::%{_id}%::history::*}-5%")
+                add "   &7&o... %{_x}% ..." to {_lore::*}
+            set {_item} to anvil
+            add " " to {_lore::*}
+            add "&7&o∫ %{ur::lang::report_a_history_middle}%" to {_lore::*}
+            if {_t2} = "true":
+                set {_item} to glowing {_item}
+            format gui slot 13 of {_p} with {_item} named "&7&o%{ur::lang::report_a_history_of}%" with lore {_lore::*}
+        else:
+            format gui slot 13 of {_p} with glowing anvil named "&c&o%{ur::lang::report_a_no_history}%"
+        set {_arrow} to true
+    else if {_t} = "priority" or "type":
+        openMenu({_p}, 3, {ur::lang::report_a_%{_t}%}, true)
+        uReportFormatter({_p}, {_t}, {_id})
+        set {_arrow} to true
+    else if {_t} = "links":
+        openMenu({_p}, 3, {ur::lang::report_a_links}, true)
+        set {_y::*} to {ur::rep::%{_id}%::link} split at "@@"
+        if {ur::cfg::URL_whitelist} = true:
+            add "&a→ %{ur::lang::link_protected}%" to {_lore::*}
+        else:
+            add "&c→ %{ur::lang::link_not_protected}%" to {_lore::*}
+        add "&7&o→ %{ur::lang::report_a_click_link}%" to {_lore::*}
+        loop {_y::*}:
+            format gui slot {ur::other::numbers::%loop-index%} of {_p} with yellow stained glass pane named "&6%loop-value%" with lore {_lore::*} to run function json("%{_p}%", "{@m-suc} &7%{ur::lang::report_a_link1}% &e&n%loop-value%||url:%loop-value%")
+        set {_arrow} to true
+    else if {_t} = "chat":
+        if {_t2} = "":
+            openMenu({_p}, 3, "%{ur::lang::report_a_chat}% [%{ur::lang::max}%: %{ur::cfg::chat_max_user}%]", true)
+            set {_c} to 0
+            loop ("user" and "admin"):
+                add 1 to {_c}
+                set {_z::%{_c}%} to ""
+                set {_p::%{_c}%} to "&c"
+                if ("%{ur::rep::%{_id}%::%loop-value%}%" parsed as player) is online:
+                    set {_p::%{_c}%} to "&a"
+                if ("%{ur::rep::%{_id}%::%loop-value%}%" parsed as player) has permission "%{ur::perm::reports_manage}%", "%{ur::perm::all}%" or "*":
+                    set {_z::%{_c}%} to "{@symbol-admin} "
+            format gui slot {ur::other::numbers::1} of {_p} with skull of ({ur::rep::%{_id}%::user} parsed as offlineplayer) named "%{_p::1}%%{_z::1}%%{ur::rep::%{_id}%::user}%" with lore "{@m-other} &c&o%{ur::lang::report_a_chat_lock}%"
+            format gui slot {ur::other::numbers::2} of {_p} with skull of ({ur::rep::%{_id}%::admin} parsed as offlineplayer) named "%{_p::2}%{@symbol-admin} %{ur::rep::%{_id}%::admin}%" with lore "{@m-other} &c&o%{ur::lang::report_a_chat_lock}%"
+            loop {ur::rep::%{_id}%::chat::*}:
+                set {_z} to ""
+                set {_o} to "&c"
+                if (loop-value parsed as player) is online:
+                    set {_o} to "&a"
+                if (loop-value parsed as player) has permission "%{ur::perm::reports_manage}%", "%{ur::perm::all}%" or "*":
+                    set {_z} to "{@symbol-admin} "
+                set {_num} to (loop-index parsed as integer)+2
+                format gui slot {ur::other::numbers::%{_num}%} of {_p} with skull of (loop-value parsed as offlineplayer) named "%{_o}%%{_z}%%loop-value%" with lore "{@m-other} &7&o%{ur::lang::report_a_chat_click_remove}%" to run function uReportManager({_id}, "%{_p}%", "remove_chat", loop-value)
+            set {_item} to red stained glass pane
+            set {_name} to "&7%{ur::lang::report_a_chat_stop}%"
+            if {ur::rep::%{_id}%::chat} is not set:
+                set {_item} to lime stained glass pane
+                set {_name} to "&7%{ur::lang::report_a_chat_start}%"
+            format gui slot 21 of {_p} with lime stained glass pane named "&a[+] &e%{ur::lang::report_a_chat_add}%" with lore {_lore::*} to run function uReportManager({_id}, "%{_p}%", "add_chat")
+            format gui slot 23 of {_p} with glowing {_item} named {_name} to run function uReportManager({_id}, "%{_p}%", "toggle_chat")
+        set {_arrow} to true
+    else if {_t} = "teleport":
+        openMenu({_p}, 3, {ur::lang::report_a_teleport2}, true)
+        if {ur::rep::%{_id}%::report} = "player":
+            set {_x::1} to "player"
+            set {_x::2} to "user"
+            set {_y::1} to 12
+            set {_y::2} to 14
+            set {_z::1} to "reported"
+            set {_z::2} to "reporter"
+            loop 2 times:
+                set {_o} to "&c"
+                if ({ur::rep::%{_id}%::%{_x::%loop-number%}%} parsed as player) is online:
+                    set {_o} to "&a"
+                set {_lore::1} to "{@m-other} &7%{ur::lang::report_a_leftclick_to}% &6%{_p}% &7-> &6%{ur::rep::%{_id}%::%{_x::%loop-number%}%}%"
+                set {_lore::2} to "{@m-other} &7%{ur::lang::report_a_rightclick_to}% &6%{ur::rep::%{_id}%::%{_x::%loop-number%}%}% &7-> &6%{_p}%"
+                format gui slot {_y::%loop-number%} of {_p} with skull of ({ur::rep::%{_id}%::%{_x::%loop-number%}%} parsed as offlineplayer) named "&e%{ur::lang::report_%{_z::%loop-number%}%}%: %{_o}%%{ur::rep::%{_id}%::%{_x::%loop-number%}%}%" with lore {_lore::*}
+        else:
+            set {_o} to "&c"
+            if ({ur::rep::%{_id}%::user} parsed as player) is online:
+                set {_o} to "&a"
+            set {_lore::1} to "{@m-other} &7%{ur::lang::report_a_leftclick_to}% &6%{_p}% &7-> &6%{ur::rep::%{_id}%::user}%"
+            set {_lore::2} to "{@m-other} &7%{ur::lang::report_a_rightclick_to}% &6%{ur::rep::%{_id}%::user}% &7-> &6%{_p}%"
+            format gui slot 13 of {_p} with skull of ({ur::rep::%{_id}%::user} parsed as offlineplayer) named "&e%{ur::lang::report_reporter}%: %{_o}%%{ur::rep::%{_id}%::user}%" with lore {_lore::*}
+        set {_arrow} to true
+    else if {_t} = "reports":
+        set {_s} to (size of {ur::rep-id::*})
+        if {_s} <= 0:
+            send "{@m-imp} %{ur::lang::report_a_no_reports}%" to {_p}
+            stop
+        set {_rows} to 3
+        set {_per_page} to 7*{_rows}
+        set {_pages} to ceil({_s}/{_per_page})
+        set {_page} to 1
+        if {_t2} is set:
+            set {ur::p::%{_p}%::page} to ({_t2} parsed as integer)
+            set {_page} to {ur::p::%{_p}%::page}
+            if {_page} > {_pages}:
+                set {_page} to {_pages}
+            if {_page} <= 0:
+                set {_page} to 1
+        set {_size} to ceil({_s}/7)
+        if {_size} > {_rows}:
+            set {_size} to {_rows}
+        set {_start} to (({_page}-1)*{_per_page})+1
+        set {_end} to {_page}*{_per_page}
+        add 2 to {_size}
+        openMenu({_p}, {_size}, "%{ur::lang::report_a_reports}% [%{_s}%/%{_page}%]", true)
+        wait 1 tick
+        set {_x::*} to {ur::rep-id::*}
+        if {_pages} > 1:
+            if {_page} != {_pages}:
+                format gui slot 9*{_size}-1 of {_p} with book named "&e%{ur::lang::next_page} to upper case% &7[%{_page}+1%]" to run function uReportAdmin({_p}, "", "reports", "%{_page}+1%")
+        if {_page} > 1:
+            format gui slot 9*{_size}-9 of {_p} with book named "&e%{ur::lang::prev_page} to upper case% &7[%{_page}-1%]" to run function uReportAdmin({_p}, "", "reports", "%{_page}-1%")
+        loop {_end} times:
+            if loop-number <= {_per_page}:
+                if {_x::%{_start}%} is set:
+                    set {_lore::*} to uReportFormatter({_p}, "repinfo", {_x::%{_start}%})
+                    set {_item} to ({ur::cfg::rep_status_%{ur::rep::%{_x::%{_start}%}%::status}%} parsed as itemtype)
+                    if {ur::rep::%{_x::%{_start}%}%::admin} is set:
+                        if "%{ur::p::%{_p}%::leader}%" = "%{_x::%{_start}%}%":
+                            set {_item} to glowing {_item}
+                    format gui slot {ur::other::numbers::%loop-number%} of {_p} with {_item} named {ur::rep::%{_x::%{_start}%}%::name} with lore {_lore::*}
+                    add 1 to {_start}
+                else:
+                    exit loop
+    else if {_t} = "delete":
+        openMenu({_p}, 3, "%{ur::lang::report_a_delete_q}%", true)
+        format gui slot 12 of {_p} with lime stained glass pane named "&7%{ur::lang::report_a_confirm}%" to close then run function uReportManager({_id}, "%{_p}%", "delete", "reports", "%{ur::p::%{_p}%::page}%")
+        format gui slot 14 of {_p} with red stained glass pane named "&7%{ur::lang::report_a_cancel}%" to run function uReportAdmin({_p}, {_id}, "manage", {_t2})
+    if {_arrow} = true:
+        format gui slot 9*3-9 of {_p} with glowing arrow named "&7%{ur::lang::report_go_back}%" to run function uReportAdmin({_p}, {_id}, "manage")
+
+function uMyReports(p: player, t: text = "", t2: text = ""):
+    if {_t} = "menu":
+        openMenu({_p}, 3, {ur::lang::myreports_menu}, true)
+        format gui slot 10 of {_p} with compass named "&e%{ur::lang::myreports_reports}%" to run function uReportAdmin({_p}, {_id}, "priority")
+
+function uReportManager(id: text = "", p: text = "", t: text = "", t2: text = "", t3: text = "", sound: boolean = true) :: boolean:
+    if {_t} doesn't contain "force-":
+        if {_t} != "delete":
+            if {ur::rep::%{_id}%::admin} is set:
+                if {ur::rep::%{_id}%::admin} != {_p}:
+                    send "{@m-imp} %{ur::lang::report_a_not_leader}%" to ({_p} parsed as player)
+                    return false
+            else if {_t2} != "3":
+                send "{@m-imp} %{ur::lang::report_a_not_leader}%" to ({_p} parsed as player)
+                return false
+    if {_t} ends with "status":
+        if {ur::rep::%{_id}%::status} != {_t2}:
+            if {_t2} = "3":
+                if {ur::p::%{_p}%::leader} is not set:
+                    if {ur::rep::%{_id}%::user} != {_p}:
+                        set {_x} to "t"
+                        set {ur::rep::%{_id}%::admin} to {_p}
+                        set {ur::p::%{_p}%::leader} to {_id}
+                    else:
+                        send "{@m-imp} %{ur::lang::report_a_own_report}%" to ({_p} parsed as player)
+                        return false
+                else:
+                    json("%{_p}%", "{@m-imp} &e%{ur::lang::report_a_already_leader}% &6##%{ur::p::%{_p}%::leader}%||ttp:&7&o%{ur::lang::report_a_click_leave}%||sgt:/ur id %{ur::p::%{_p}%::leader}% leave")
+                    return false
+            else if {ur::rep::%{_id}%::admin} = {_p}:
+                set {_x} to "l"
+                delete {ur::rep::%{_id}%::admin}
+                delete {ur::p::%{_p}%::leader}
+                clear {ur::rep::%{_id}%::chat::*}
+            uReportHistory({_id}, {_p}, "add:status_change", {_t2})
+            set {ur::rep::%{_id}%::status} to {_t2}
+            if {_x} = "t":
+                send "{@m-suc} %{ur::lang::report_taken_leadership}% &6##%{_id}%" to ({_p} parsed as player)
+            else:
+                send "{@m-suc} %{ur::lang::report_left_leadership}% &6##%{_id}%" to ({_p} parsed as player)
+            if {_t3} = "status":
+                uReportAdmin(({_p} parsed as player), {_id}, {_t3})
+            if {ur::cfg::sounds_all}, {ur::cfg::sounds_status_change} and {_sound} = true:
+                if "%{_p}%" != "%{ur::rep::%{_id}%::user}%":
+                    uReportSounds(({_p} parsed as player))
+            notifyManager("%{ur::rep::%{_id}%::user}%", "status_change", "%{_id}%", "-player")
+    else if {_t} = "priority" or "type":
+        if uncolored {ur::rep::%{_id}%::%{_t}%} != uncolored {_t2}:
+            set {ur::rep::%{_id}%::%{_t}%} to uncolored {_t2}
+            uReportHistory({_id}, {_p}, "add:change_%{_t}%", {_t2})
+            uReportAdmin(({_p} parsed as player), {_id}, "manage")
+    else if {_t} = "delete":
+        if {ur::cfg::sounds_all}, {ur::cfg::sounds_delrep} and {_sound} = true:
+            uReportSounds(({ur::rep::%{_id}%::user} parsed as player), "ENTITY_GENERIC_EXTINGUISH_FIRE")
+            if "%{_p}%" != "%{ur::rep::%{_id}%::user}%":
+                uReportSounds(({_p} parsed as player), "ENTITY_GENERIC_EXTINGUISH_FIRE")
+        uReportManager({_id}, {ur::rep::%{_id}%::admin}, "status", "2")
+        notifyManager("%{ur::rep::%{_id}%::user}%", "delrep", "%{_id}%", "-player")
+        remove {_id} from {ur::p::%{ur::rep::%{_id}%::user}%::rep::*}
+        delete {ur::rep::%{_id}%::*}
+        loop {ur::rep-id::*}:
+            if "%loop-value%" = "%{_id}%":
+                delete {ur::rep-id::%loop-index%}
+                delete {ur::rep-id::%loop-value%} 
+                exit loop
+        remove "%{_id}%" from {ur::rep-id::*}
+        if (size of {ur::rep-id::*}) <= 0:
+            close ({_p} parsed as player)'s inventory
+        if {_t2} = "reports":
+            uReportAdmin(({_p} parsed as player), "", "reports", "%{ur::p::%{_p}%::page}%")
+    else if {_t} = "add_chat":
+        if (size of {ur::rep::%{_id}%::chat::*})+2 < ({ur::cfg::chat_max_user} parsed as integer):
+            close ({_p} parsed as player)'s inventory
+            set {ur::p::%{_p}%::submit} to {_id}
+            send "{@m-info} &7&o%{ur::lang::report_a_input_name}%" to ({_p} parsed as player)
+            loop 15 times:
+                wait 1 second
+                if {ur::p::%{_p}%::submit} is not set:
+                    set {_s} to (size of {ur::rep::%{_id}%::chat::*})
+                    add {_id} to {ur::p::%{ur::rep::%{_id}%::chat::%{_s}%}%::rep::chat::*}
+                    uReportHistory({_id}, {_p}, "add:player_chat_added", "%{ur::rep::%{_id}%::chat::%{_s}%}%")
+                    if {ur::cfg::sounds_all}, {ur::cfg::sounds_player_chat_add} and {_sound} = true:
+                        uReportSounds(({ur::rep::%{_id}%::user} parsed as player))
+                    exit loop
+                if loop-number = 15:
+                    delete {ur::p::%{_p}%::submit}
+                    send "{@m-imp} %{ur::lang::report_time_out}%" to ({_p} parsed as player)
+        else:
+            send "{@m-imp} %{ur::lang::report_a_chat_limit1}%" to ({_p} parsed as player)
+        stop
+    else if {_t} = "remove_chat":
+        remove {_id} from {ur::p::%{_t2}%::rep::chat::*}
+        remove {_t2} from {ur::rep::%{_id}%::chat::*}
+        uReportHistory({_id}, {_p}, "add:player_chat_removed", "%{_t2}%")
+        uReportAdmin(({_p} parsed as player), {_id}, "chat")
+        if {ur::cfg::sounds_all}, {ur::cfg::sounds_player_chat_rem} and {_sound} = true:
+            uReportSounds(({ur::rep::%{_id}%::user} parsed as player))
+        stop
+    else if {_t} = "toggle_chat":
+        if {ur::rep::%{_id}%::chat} is not set:
+            set {ur::rep::%{_id}%::chat} to true
+            loop ({ur::rep::%{_id}%::chat::*}, {ur::rep::%{_id}%::admin} and {ur::rep::%{_id}%::user}):
+                set {_v} to ("%loop-value%" parsed as player)
+                send "{@line-u}" to {_v}
+                send "{@line-w}" to {_v}
+                send replace_arg("{@line-w} {@m-imp} %{ur::lang::report_id_update}%", {_id}) to {_v}
+                send "{@line-w} &6%{_p}% &e%{ur::lang::report_a_chat_started}%" to {_v}
+                send "{@line-w} %{ur::lang::report_a_chat_type}%" to {_v}
+                send "{@line-w} %{ur::lang::report_a_chat_recorded}%" to {_v}
+                send "{@line-w}" to {_v}
+                send "{@line-u}" to {_v}
+    uReportRefresh({_p})
+    return true
+
+function uReportHistory(id: text = "", p: text = "", t: text = "", t2: text = "", t3: text = "") :: text:
+    set {_timestamp} to timezone {ur::timezone}'s time
+    if {_t} starts with "add:":
+        replace all "add:" with "" in {_t}
+        set {_t2} to replace_arg({ur::lang::report_status_%{_t2}%}, {ur::rep::%{_id}%::admin})
+        set {_add} to "%{_t}%;%{_p}%;%{_t2}%;%{_timestamp}%"
+        replace all "<none>" with {ur::lang::undefined} in {_add}
+        add {_add} to {ur::rep::%{_id}%::history::*} 
+    else if {_t} starts with "get":
+        set {ur::tmp::insert::*} to {ur::rep::%{_id}%::history::*}
+        uReverse({ur::tmp::insert::*}, true)
+        set {_l::*} to {ur::tmp::insert::*}
+        delete {ur::tmp::insert::*}
+        set {_x::*} to {_l::%{_t2}%} split at ";"
+        set {_full} to {ur::lang::report_history_%{_x::1}%}
+        if {_t3} doesn't contain "menu:true":
+            set {_full} to "%{_full}% &7[&6{arg3}&7]"
+        return replace_arg({_full}, {_x::2}, {_x::3}, {_x::4})
+    else if {_t} = "list":
+        set {_p} to {_p} parsed as player
+        if (size of {ur::rep::%{_id}%::history::*}) > 0:
+            set {_page} to 1
+            set {_max} to 5
+            set {_pages} to ceil((size of {ur::rep::%{_id}%::history::*})/{_max})
+            if {_t2} != "":
+                set {_page} to {_t2} parsed as integer
+                if {_page} <= 0:
+                    set {_page} to 1
+                if {_page} > {_pages}:
+                    set {_page} to {_pages}
+            set {ur::tmp::insert::*} to {ur::rep::%{_id}%::history::*}
+            uReverse({ur::tmp::insert::*}, true)
+            set {_x::*} to {ur::tmp::insert::*}
+            set {_list::*} to createPage({_x::*}, "%{_max}%", {_page})
+            loop 11 times:
+                send " " to {_p}
+            send "{@line-u}" to {_p}
+            send "{@line-w} " to {_p}
+            send "{@line-w} %{ur::lang::report_history_of_info}%%{_id}% &f(%{ur::lang::history_page}% %{_page}%/%{_pages}%)" to {_p}
+            send "{@line-w} " to {_p}
+            loop {_list::*}:
+                set {_num} to ({_page} * 5) - (5 - loop-index parsed as integer)
+                set {_val} to uReportHistory({_id}, "%{_p}%", "get", "%{_num}%", "rev:true")
+                send "{@line-w} &7%{_num}%. %{_val}%" to {_p}
+            send "{@line-w} " to {_p}
+            json("%{_p}%", "{@line-w} &f          [%{ur::lang::prev_page}%]||cmd:/ur id %{_id}% history %{_page} -1%||      [%{ur::lang::next_page}%]||cmd:/ur id %{_id}% history %{_page} +1%")
+            send "{@line-w} " to {_p}
+            send "{@line-d}" to {_p}
+        else:
+            send "{@m-imp} &c&o%{ur::lang::report_a_no_history}%" to {_p}
+    else if {_t} = "clear":
+        clear {ur::rep::%{_id}%::history::*}
+        uReportHistory({_id}, {_p}, "add:clear", {_p})
+
+function uReportRefresh(p: text = ""):
+    loop all players where [input has permission "%{ur::perm::rep_menu}%"]:
+        uncolored name of loop-player's current inventory starts with uncolored {ur::lang::report_a_reports}
+        uReportAdmin(loop-player, "", "reports", "%{ur::p::%loop-player%::page}%")
+
+command /report:
+    usage: {@m-info} &e/report
+    aliases: {@alias-report}
+    trigger:
+        if {ur::p::%player%::lock-cmd} is not set:
+            uReport(player, "menu")
+        else:
+            send "{@m-error} %{ur::lang::cmd_cant_execute}%"
+
+command /myreports:
+    usage: {@m-info} &e/myreports
+    trigger:
+        if {ur::p::%player%::lock-cmd} is not set:
+            uMyReports(player, "menu")
+        else:
+            send "{@m-error} %{ur::lang::cmd_cant_execute}%"
+
+command /reports [<text>]:
+    usage: {@m-info} &e/reports &6<page>
+    trigger:
+        if {ur::p::%player%::lock-cmd} is not set:
+            set {ur::p::%{_p}%::page} to 1
+            if arg-1 is set:
+                set {_p} to arg-1
+            uReportAdmin(player, "", "reports", "%{_p}%")
+        else:
+            send "{@m-error} %{ur::lang::cmd_cant_execute}%"
+        
+
+command /ur [<text>] [<text>] [<text>] [<text>]:
+    usage: {@m-info} &e/uReport &6help
+    aliases: uReport
+    trigger:
+        if uPerm(player, {ur::perm::command}) = true:
+            if arg-1 is "reload" or "refresh" or "rel" or "ref":
+                if uPerm(player, {ur::perm::reload}) = true:
+                    set {ur::command} to true
+                    set {_time} to now
+                    make player run command "sk reload %script%" as op
+                    if refresh_lang() = true:
+                        send "{@m-suc} %{ur::lang::reloaded_lang}%"
+                    else:
+                        uFix(player)
+                        stop
+                    if refresh_cfg() = true:
+                        send "{@m-suc} %{ur::lang::reloaded_cfg}%"
+                    else:
+                        uFix(player, "config")
+                        stop
+                    set {_time2} to now
+                    set {_diff} to difference between {_time} and {_time2}
+                    if {_diff} >= {@max-expected-time}:
+                        send "{@m-imp} %{ur::lang::reloaded_long}% &c%{_diff}%"
+                        stop
+                    send "{@m-suc} %{ur::lang::reloaded}% &6%{_diff}%"
+            else if arg-1 is "help" or "?":
+                if arg-2 contains "0", "1", "2", "3", "4", "5", "6", "7", "8" or "9":
+                    helpManager(player, "none", arg-2 parsed as integer)
+                else if arg-2 is not set:
+                    helpManager(player)
+                else:
+                    helpManager(player, arg-2)
+            else if arg-1 is "test":
+                set {_times} to 1
+                if arg-2 is set:
+                    set {_times} to arg-2 parsed as integer
+                loop {_times} times:
+                    set {_x} to random element out of "player", "bug", "account", "payment"
+                    set {_pr} to random integer between 1 and 5
+                    set {_x::*} to {ur::lang::report_priority_%{_pr}%} split at "$$"
+                    set {_name} to {_x::1}
+                    set {_type} to random integer between 1 and 3
+                    set {_type} to {ur::lang::report_type_%{_x}%_%{_type}%}
+                    set {ur::p::ADMIN::tmp::rep::%{_x}%::priority} to {_name}
+                    if {_x} = "player":
+                        set {ur::p::ADMIN::tmp::rep::%{_x}%::player} to "ADMIN"
+                    if arg-3 = "-s":
+                        createCase("ADMIN", {_x}, true)
+                    else:
+                        createCase("ADMIN", {_x})
+            else if arg-1 is "deltest":
+                set {_times} to 1
+                if arg-2 is set:
+                    set {_times} to arg-2 parsed as integer
+                loop {_times} times:
+                    uReportManager({ur::rep-id::%loop-number%}, "ADMIN", "delete")
+            else if arg-1 is "id" or "report":
+                if arg-3 is not set:
+                    if arg-2 is set:
+                        uReportAdmin(player, arg-2)
+                    else:
+                        helpManager(player, arg-1)
+                if arg-3 is "history":
+                    if arg-4 is set:
+                        uReportHistory(arg-2, "%player%", "list", arg-4)
+                    else:
+                        uReportHistory(arg-2, "%player%", "list")
+                else if arg-3 is "manage":
+                    uReportAdmin(player, arg-2, "manage")
+                else if arg-3 is "delete" or "remove":
+                    if uReportManager(arg-2, "%player%", "delete") = true:
+                        send replace_arg("{@m-suc} &e%{ur::lang::report_a_deleted}%", "&6##%arg-2%&e")
+                    else:
+                        send replace_arg("{@m-imp} &e%{ur::lang::report_a_not_deleted}%", "&6##%arg-2%&e")
+                else if arg-3 contains "leave":
+                    if arg-3 doesn't contain "force-":
+                        if "%{ur::rep::%arg-2%::admin}%" != "%player%":
+                            send "{@m-imp} &e%{ur::lang::report_a_not_leader}%"
+                            stop
+                    uReportManager(arg-2, "%player%", "force-status", "1")
+                    delete {ur::p::%player%::leader}
+                    delete {ur::p::%arg-2%::admin}
+            else if arg-1 is "reinstall":
+                if executor is player:
+                    send "{@m-imp} &7%{ur::lang::reinstall_type_console}%"
+                    send "{@m-imp} &7%colored {ur::lang::reinstall_type_here}%" to console
+                else if executor is console:
+                    if {ur::confirm-reinstall} is not set:
+                        set {ur::confirm-reinstall} to true
+                        send "&7%colored {ur::lang::reinstall_warning}%"
+                        send "{@m-imp} &c%{ur::lang::confirm}%"
+                        wait 15 seconds
+                        delete {ur::confirm-reinstall}
+                    else:
+                        send "{@m-suc} &7%{ur::lang::reinstall_soon}%"
+                        wait 5 seconds
+                        setUp("stop")
+                        skutil delete dir "%{ur::paths::ur}%"
+                        downloadManager("update")
+                        delete {ur::*}
+                        set {ur::reinstall} to true
+                        loop ("disable", "enable" and "reload"):
+                            execute console command "sk %loop-value% %script%"
+                            wait 1 tick
+                        wait 1 second
+                        delete {ur::reinstall}
+                        setUp()
+            else if arg-1 is "uninstall":
+                if uPerm(player, {ur::perm::uninstall}) = true:
+                    if {ur::cfg::passwd_required} = true:
+                        if difference between {ur::%player%::session} and now >= ("%{ur::cfg::session_time}% minutes" parsed as timespan):
+                            delete {ur::%player%::session}
+                            send "{@m-imp} %{ur::lang::session_expired}%"
+                        if {ur::%player%::session} is not set:
+                            if arg-2 is set:
+                                if {ur::cfg::passwd} = arg-2:
+                                    send replace_arg("{@m-suc} %{ur::lang::passwd_success}%", "%{ur::cfg::session_time}%")
+                                    set {ur::%player%::session} to now
+                                else:
+                                    send "{@m-error} %{ur::lang::wrong_passwd}%"
+                                    stop
+                            else:
+                                send "{@m-imp} %{ur::lang::passwd_required}%"
+                                stop
+                    if {ur::%player%::confirm} is not set:
+                        set {ur::%player%::confirm} to true
+                        send "{@m-imp} &7%{ur::lang::uninstall_info}%"
+                        send "{@m-imp} &7%{ur::lang::uninstall_warning}%"
+                        send "{@m-imp} &7%{ur::lang::confirm}%"
+                        wait 10 seconds
+                        delete {ur::%player%::confirm}
+                    else:
+                        send "{@m-imp} &7%{ur::lang::uninstalling}%"
+                        send "{@m-ur} &7%{ur::lang::uninstall_core}%..." to console
+                        skutil delete dir "%{ur::paths::ur}%"
+                        execute console command "sk disable uReport"
+                        skutil delete file "%{ur::paths::core}%/-%script%.sk"
+                        send "{@m-ur} &7%{ur::lang::uninstall_variables}%..." to console
+                        delete {ur::*}
+                        send "&a> OK!" to console
+                        send "&a> OK!" to player
+            else if arg-1 is "history":
+                if uPerm(player, {ur::perm::history}, true) = true:
+                    set {_t1} to "ur"
+                    set {_t2} to "uReport"
+                    if arg-3 is "remove":
+                        if uPerm(player, {ur::perm::history_remove}, true) = true:
+                            if arg-4 is set:
+                                set {_val} to arg-4
+                                replace all "%%20" with " " in {_val}
+                                remove {_val} from {ur::history::%{_t1}%::*}
+                                execute player command "/ur history %{_t1}%"
+                        stop
+                    if arg-3 != "clear" or "delete" or "del" or "clean":
+                        if size of {ur::history::%{_t1}%::*} > 0:
+                            loop 20 times:
+                                send " "
+                            send "{@line-u}"
+                            send "{@line-w}"
+                            set {_page} to 1
+                            if arg-3 parsed as integer > 0:
+                                set {_page} to arg-3 parsed as integer
+                            set {_history::*} to createPage(uReverse({ur::history::%{_t1}%::*}), "5", {_page})
+                            send "{@line-w} {@m-other} &7%{ur::lang::history_updates}% &e%{_t2}%&7: &f(%{ur::lang::history_page}% %{_page}%/%{ur::tmp::pages}%)"
+                            loop {_history::*}:
+                                set {_val::*} to loop-value split at ";"
+                                set {_x} to replace_arg("%{ur::lang::history_updated}%", "&c%{_val::1}%&7", "&a%{_val::2}%&7", "&e%{_val::3}%&7")
+                                set {_val} to loop-value
+                                replace all " " with "%%20" in {_val}
+                                json("%player%", "{@line-w} &7%loop-index%. &7%{_x}%||ttp:&c&o%{ur::lang::click_remove}% %loop-index%||cmd:/ur history cfg remove %{_val}%")
+                            if {ur::tmp::pages} > 1:
+                                send "{@line-w}"
+                                json("%player%", "{@line-w} &f[%{ur::lang::prev_page}%]||cmd:/ur history %{_t1}% %{_page} -1%||      [%{ur::lang::next_page}%]||cmd:/ur history %{_t1}% %{_page} +1%")
+                            send "{@line-w}"
+                            send "{@line-d}"
+                        else:
+                            set {_x} to replace_arg("%{ur::lang::history_empty}%", "&e%{_t2}%&7")
+                            send "{@m-imp} &7%{_x}%"
+                    else if uPerm(player, {ur::perm::history_clear}, true) = true:
+                        logAction("del-his", "%{_t2}%")
+                        delete {ur::history::%{_t1}%::*}
+                        send "{@m-suc} %{ur::lang::history_cleared}%"
+            else if arg-1 is "timezone" or "time-zone" or "timezones" or "time" or "tz":
+                if uPerm(player, {ur::perm::timezone}, true) = true:
+                    if arg-2 is "set" or "change":
+                        if uPerm(player, {ur::perm::timezone_change}, true) = true:
+                            if arg-3 is set:
+                                send "{@m-imp} %{ur::lang::timezone_warning}%"
+                                set {_time} to timezone arg-3's time
+                                send "{@m-suc} %{ur::lang::timezone_exists}%"
+                                set {_x} to replace_arg("%{ur::lang::timezone_changed}%", "&e%{ur::timezone}%&7", "&e%arg-3%&7")
+                                send "{@m-suc} &7%{_x}%"
+                                set {ur::timezone} to arg-3
+                                execute player command "/ur timezone"
+                                stop
+                            helpManager(player, "timezone")
+                            stop
+                    if {ur::timezone} is not set:
+                        set {ur::timezone} to "CET"
+                    set {_time} to timezone "%{ur::timezone}%"'s time
+                    set {_x} to replace_arg("%{ur::lang::timezone_current}%", "&e%{ur::timezone}%&7")
+                    send "{@m-other} &7%{_x}% &a%{_time}%"
+            else if arg-1 is "restore" or "reset":
+                if arg-2 is "lang" or "language":
+                    if uPerm(player, {ur::perm::restore_lang}, true) = true:
+                        set {_arg} to "null"
+                        if arg-3 is set:
+                            set {_arg} to arg-3
+                        send "{@m-imp} &7&o%{ur::lang::please_wait}%"
+                        if downloadManager("lang", true, {_arg}) = true:
+                            send "{@m-suc} %{ur::lang::restore_lang}%"
+                        else:
+                            send "{@m-error} %{ur::lang::restore_lang_err}%"
+                else if arg-2 is "cfg" or "configuration" or "config" or "config.yml" or "cfg.yml":
+                    if uPerm(player, {ur::perm::restore_config}, true) = true:
+                        send "{@m-imp} &o%{ur::lang::please_wait}%"
+                        if downloadManager("cfg", true) = true:
+                            send "{@m-suc} %{ur::lang::restore_cfg}%"
+                        else:
+                            send "{@m-error} %{ur::lang::restore_cfg_err}%"
+                else:
+                    helpManager(player, "reset")
+            else if arg-1 is "cfg" or "configuration" or "config" or "config.yml" or "cfg.yml" or "settings" or "setting":
+                if arg-2 is not set:
+                    configManager("menu", "%player%")
+                else if arg-2 is "reload" or "rel" or "ref" or "refresh":
+                    if uPerm(player, {ur::perm::config_reload}, true) = true:
+                        if refresh_cfg() = true:
+                            send "{@m-suc} %{ur::lang::refresh_cfg}%"
+                        else:
+                            send "{@m-error} %{ur::lang::refresh_cfg_err}%"
+                    stop
+                refresh_cfg()
+                if arg-3 = {@blacklisted-parameters}:
+                    if arg-2 != "disable" or "enable" or "toggle":
+                        if uPerm(player, {ur::perm::config_chpass}, true) = false:
+                            stop
+                    else:
+                        send "{@m-imp} %{ur::lang::config_cannot_action}%"
+                        stop
+                if arg-3 is set:
+                    if arg-2 is "disable":
+                        if uPerm(player, {ur::perm::config_disable}, true) = true:
+                            if configManager("check", arg-3, "%player%") = true:
+                                if skutil yaml value "cfg.%arg-3%" from file "%{ur::paths::ur}%/config.yml" != false:
+                                    set skutil yaml value "cfg.%arg-3%" from file "%{ur::paths::ur}%/config.yml" to false
+                                    send "{@m-suc} %{ur::lang::config_disabled}% &e%arg-3%"
+                                    refresh_cfg()
+                                    stop
+                                send "{@m-imp} %{ur::lang::config_already_disabled}%"
+                    else if arg-2 is "enable":
+                        if uPerm(player, {ur::perm::config_enable}, true) = true:
+                            if configManager("check", arg-3, "%player%") = true:
+                                if skutil yaml value "cfg.%arg-3%" from file "%{ur::paths::ur}%/config.yml" != true:
+                                    set skutil yaml value "cfg.%arg-3%" from file "%{ur::paths::ur}%/config.yml" to true
+                                    send "{@m-suc} %{ur::lang::config_enabled}% &e%arg-3%"
+                                    refresh_cfg()
+                                    stop
+                                send "{@m-imp} %{ur::lang::config_already_enabled}%"
+                    else if arg-2 is "toggle":
+                        if uPerm(player, {ur::perm::config_toggle}, true) = true:
+                            if configManager("check", arg-3, "%player%") = true:
+                                if configManager("toggle", arg-3) = true:
+                                    send "{@m-suc} %{ur::lang::config_enabled}% &e%arg-3%"
+                                else:
+                                    send "{@m-imp} %{ur::lang::config_disabled}% &e%arg-3%"
+                                refresh_cfg()
+                    else if arg-2 is "set":
+                        if uPerm(player, {ur::perm::config_set}, true) = true:
+                            if configManager("check", arg-3, "%player%") = true:
+                                set skutil yaml value "cfg.%arg-3%" from file "%{ur::paths::ur}%/config.yml" to arg-4
+                                set {_x} to replace_arg("&7%{ur::lang::config_set}%&7", "&e%arg-3%&7")
+                                send "{@m-suc} %{_x}% &e%arg-4%"
+                    else if arg-2 is "status":
+                        if uPerm(player, {ur::perm::config_status}, true) = true:
+                            if getStatus(arg-3) = "true":
+                                send replace_arg("{@m-other} %{ur::lang::config_isenabled}%", "&e%arg-3%&7")
+                            else:
+                                send replace_arg("{@m-other} %{ur::lang::config_isdisabled}%", "&e%arg-3%&7")
+                    else:
+                        helpManager(player, "config")
+                else if arg-2 = "help" or "?":
+                    helpManager(player, "config")
+            else if arg-1 is "backup" or "back-up":
+                if arg-2 is "cfg" or "configuration" or "config" or "config.yml" or "cfg.yml":
+                    set {_t} to "cfg"
+                else if arg-2 is "logs" or "log" or "logs.yml" or "log.yml":
+                    set {_t} to "logs"
+                else if arg-2 is "all" or "everything":
+                    loop ("cfg" and "logs"):
+                        execute player command "ur backup %loop-value%"
+                    stop
+                if filesManager("backup-%{_t}%") = true:
+                    send "{@m-suc} %{ur::lang::backup_success}%"
+                else:
+                    send "{@m-imp} %{ur::lang::backup_error_f_exists}%"
+            else if arg-1 is "faq" or "question" or "ask" or "search":
+                if uPerm(player, {ur::perm::faq}) = true:
+                    if arg-2 and arg-3 and arg-4 is set:
+                        set {_x} to "%arg-2% %arg-3% %arg-4%"
+                    else if arg-2 and arg-3 is set:
+                        set {_x} to "%arg-2% %arg-3%"
+                    else if arg-2 is set:
+                        set {_x} to arg-2
+                    else:
+                        send "{@m-imp} &o%{ur::lang::search_no_question}%"
+                        stop
+                    searchManager({_x}, "%player%")
+            else if arg-1 is "answer":
+                searchManager(arg-2, "%player%", true)
+            else if arg-1 is "addons" or "add-ons":
+                if uPerm(player, {ur::perm::addons}) = true:
+                    set {_plg::*} to list of plugins
+                    loop {@addons}:
+                        set {_addon::%loop-value-1%} to false
+                        if "%{_plg::*}%" contains "%loop-value-1%":
+                            set {_addon::%loop-value-1%} to true
+                    if skutil file "%{ur::paths::core}%/json.sk" exists:
+                        set {_addon::json.sk} to true
+                    send "{@m-other} %{ur::lang::addons_check}%"
+                    loop {@addons}:
+                        if {_addon::%loop-value%} is true:
+                            send "&a&l[✓] &7%loop-value%"
+                        else:
+                            send "&c&l[✘] &7%loop-value%"
+                    loop {_addon::*}:
+                        if loop-value is false:
+                            set {_null} to true
+                    if {_null} is not set:
+                        send "{@m-suc} %{ur::lang::addons_all_req}%"
+                    else:
+                        send "{@m-error} %{ur::lang::addons_nall_req}%"
+            else if arg-1 is "update" or "up-date" or "u":
+                if arg-2 is "check" or "c":
+                    if uPerm(player, {ur::perm::update_check}, true) = true:
+                        send "{@m-imp} &7&o%{ur::lang::please_wait}%"
+                        set {_ver} to getNewVersion()
+                        if checkUpdate() = false:
+                            json("%player%", "{@m-imp} &7%{ur::lang::version_uReport}% &c%{ur::version}% &7-> &a%{_ver}% &f&o(%{ur::lang::version_outdated1}%)||ttp:&a&o%{ur::lang::click_update}%||cmd:/ur update download")
+                        else:
+                            send "{@m-suc} &e%{ur::lang::version_c_current}% &6%{_ver}%"
+                else if arg-2 is "download" or "dl" or "ureport" or "script" or "ur":
+                    if uPerm(player, {ur::perm::update_download}, true) = true:
+                        if checkUpdate() = false:
+                            json("%player%", "{@m-imp} &7%{ur::lang::update_logs}%||sgt:/ur cfg disable send_update_logs")
+                            if downloadManager("update") = true:
+                                send "{@m-suc} %{ur::lang::update_success}%"
+                            else:
+                                send "{@m-error} %{ur::lang::update_fail}%"
+                        else:
+                            send "{@m-imp} %{ur::lang::version_current}%"
+                else:
+                    helpManager(player, "update")
+            else if arg-1 is "lang" or "language" or "l":
+                if arg-2 is "change" or "select" or "set":
+                    if uPerm(player, {ur::perm::lang_set}, true) = true:
+                        if arg-3 is set:
+                            if file "%{ur::paths::langs}%/lang_%arg-3%.yml" doesn't exist:
+                                langManager("dl", arg-3)
+                            set {ur::lang} to arg-3
+                            if refresh_lang() = true:
+                                send "{@m-suc} &7%{ur::lang::changed_lang}% &e%{ur::lang} to upper case%"
+                                set {ur::langs} to true
+                                stop
+                            send "{@m-error} &c&lERROR! &cYou have probably entered wrong language name or some files are missing! Please try again."
+                else if arg-2 is "reload" or "rel" or "ref" or "refresh" or "r":
+                    if uPerm(player, {ur::perm::lang_reload}, true) = true:
+                        if refresh_lang() = true:
+                            send "{@m-suc} %{ur::lang::refreshed_lang}%"
+                        else:
+                            uFix(player)
+                else if arg-2 is "list" or "li" or "l":
+                    if uPerm(player, {ur::perm::lang_list}, true) = true:
+                        set {_x::*} to all files in "%{ur::paths::langs}%/"
+                        if {_x::1} is set:
+                            replace all "lang_" and ".yml" with "" in {_x::*}
+                            set {_list} to langManager("list")
+                            set {_list} to "&c%{_list}%"
+                            replace all " " with " &c" in {_list}
+                            replace all "," with "&7," in {_list}
+                            send "{@m-info} %{ur::lang::lang_owned}%"
+                            loop {_x::*}:
+                                replace all loop-value with "&a%loop-value%" in {_list}
+                            send "{@m-other} &7%{ur::lang::langs_list}% %{_list}%"
+                        else:
+                            send "{@m-imp} %{ur::lang::no_langs_found}%"
+                else if arg-2 is "download" or "dl":
+                    if uPerm(player, {ur::perm::lang_download}, true) = true:
+                        if arg-3 = "all":
+                            set {_list} to langManager("list")
+                            set {_list::*} to {_list} split at ", "
+                            loop {_list::*}:
+                                execute player command "/ur lang download %loop-value%"
+                        else if arg-3 is set:
+                            set {_} to langManager("dl", arg-3)
+                            send "%{_}% &e[%arg-3%]" to player
+                else if arg-2 is "help" or "?":
+                    helpManager(player, "language")
+                else:
+                    send "{@m-info} &7%{ur::lang::current_lang}% &e%{ur::lang}% &7(%{ur::lang::lang}%)"
+            else:
+                helpManager(player)
+
+on command:
+    if full command contains "sk reload %script%":
+        if executor is not console:
+            if {ur::command} is not set:
+                send "{@m-imp} &7%{ur::lang::sk_reload}%" to executor
+            else if {ur::reinstall} is set:
+                stop
+            delete {ur::command}
+
+on join:
+    if player has permission "%{ur::perm::get_update_notif}%":
+        wait 3 seconds
+        if checkUpdate() = false:
+            updateNotify(player)
+
+every 5 minutes:
+    if {ur::cfg::update_notif} = true:
+        if checkUpdate() = false:
+            if {ur::cfg::auto_update_uReport} = true:
+                downloadManager("update", false, "", true)
+            else:
+                loop all players where [input has permission "%{ur::perm::get_update_notif}%"]:
+                    updateNotify(loop-player)
+
+on inventory close:
+    if {ur::p::%player%::tmp::anti-close} = true:
+        delete {ur::p::%player%::tmp::anti-close}
+        stop
+    delete {ur::p::%player%::tmp::rep::*}
+
+on inventory click:
+    if player has permission "%{ur::perm::command}%":
+        set {_x} to uncolored name of player's current inventory
+        set {_id} to last ({ur::cfg::id_length} parsed as integer)+1 characters of uncolored name of clicked item
+        if {_id} contains "##":
+            if {_x} starts with uncolored {ur::lang::report_a_reports}:
+                set {_rep} to true
+            replace all "##" with "" in {_id}
+            if "%click type%" = "left mouse button":
+                uReportAdmin(player, {_id}, "manage")
+                stop
+            else if "%click type%" contains "right mouse button":
+                if {_rep} = true:
+                    if "%click type%" contains "with shift":
+                        uReportManager({_id}, "%player%", "delete", "", "", false)
+                        stop
+                    else:
+                        uReportManager({_id}, "%player%", "status", "3")
+                else:
+                    uReportManager({_id}, "%player%", "status", "3")
+            else if "%click type%" = "middle mouse button":
+                uReportManager({_id}, "%player%", "status", "1")
+            if {_rep} = true:
+                uReportAdmin(player, {_id}, "reports", "%{ur::p::%player%::page}%")
+            else:
+                uReportAdmin(player, {_id})
+            stop
+        set {_y} to uncolored {ur::lang::report_a_teleport2}
+        if {_x} starts with {_y}:
+            if "%clicked item%" contains "player head":
+                set {_x::*} to uncolored "%clicked item%" split at ": "
+                set {_x::2} to {_x::2} parsed as player
+                if "%click type%" = "left mouse button":
+                    close player's inventory
+                    if "%{_x::2}%" is not "%player%":
+                        if ("%{_x::2}%" parsed as player) is online:
+                            teleport player to {_x::2}
+                            send replace_arg("{@m-suc} %{ur::lang::report_a_teleported}%", "%player%", "%{_x::2}%")
+                        else:
+                            send "{@m-imp} &6%{_x::2}% &e%{ur::lang::report_a_not_online}%"
+                    else:
+                        send "{@m-imp} &e%{ur::lang::report_a_teleport_yourself}%"
+                else if "%click type%" = "right mouse button":
+                    close player's inventory
+                    if "%{_x::2}%" is not "%player%":
+                        if ("%{_x::2}%" parsed as player) is online:
+                            teleport {_x::2} to player
+                            send replace_arg("{@m-suc} %{ur::lang::report_a_teleported}%", "%{_x::2}%", "%player%")
+                            send "{@m-imp} &e%{ur::lang::report_a_you_teleported}% &6%player%" to {_x::2}
+                        else:
+                            send "{@m-imp} &6%{_x::2}% &e%{ur::lang::report_a_not_online}%"
+                    else:
+                        send "{@m-imp} &e%{ur::lang::report_a_teleport_yourself}%"
+            stop
+        set {_y} to uncolored {ur::lang::report_a_menu_history}
+        replace all "{arg1}" with "" in {_y}
+        if {_x} starts with {_y}:
+            replace all {_y} with "" in {_x}
+            if "%clicked slot%" = "13":
+                if "%click type%" = "left mouse button":
+                    close player's inventory
+                    uReportHistory({_x}, "%player%", "list")
+                else if "%click type%" = "middle mouse button":
+                    uReportHistory({_x}, "%player%", "clear")
+                    uReportAdmin(player, {_x}, "history", "true")
+            stop
+
+on chat:
+    if {ur::%player%::input} = true:
+        set {ur::%player%::input-val} to uncolored message
+        delete {ur::%player%::input}
+        cancel event
+    else if {ur::p::%player%::tmp::rep::submit-submit} or {ur::p::%player%::submit} is set:
+        if uncolored message != "cancel":
+            set {_l} to length of uncolored message
+            if {_l} < ({ur::cfg::player_name_min_len} parsed as integer):
+                set {_c} to true
+            else if {_l} > ({ur::cfg::player_name_max_len} parsed as integer):
+                set {_c} to true
+            if {_c} = true:
+                send "{@m-imp} &e%{ur::lang::report_player_short}% &6[%{ur::cfg::player_name_min_len}%, %{ur::cfg::player_name_max_len}%]"
+                cancel event
+                stop
+            if {ur::p::%player%::submit} is not set:
+                set {ur::p::%player%::tmp::rep::player::player} to uncolored message
+            else:
+                if uncolored message != "%{ur::rep::%{ur::p::%player%::submit}%::user}%" or "%{ur::rep::%{ur::p::%player%::submit}%::admin}%":
+                    if {ur::rep::%{ur::p::%player%::submit}%::chat::*} doesn't contain uncolored message:
+                        add uncolored message to {ur::rep::%{ur::p::%player%::submit}%::chat::*}
+                        send replace_arg("{@m-suc} %{ur::lang::report_a_chat_player_added}%", uncolored message) to player
+                    else:
+                        send replace_arg("{@m-imp} %{ur::lang::report_a_chat_player_already}%", uncolored message) to player
+                uReportAdmin(player, {ur::p::%player%::submit}, "chat")
+                delete {ur::p::%player%::submit}
+                cancel event
+                stop
+        else:
+            send "{@m-imp} &7%{ur::lang::report_cancelled}%" to player
+        uReport(player, "window-main", "player")
+        delete {ur::p::%player%::submit} and {ur::p::%player%::tmp::anti-close} and {ur::p::%player%::tmp::rep::submit-submit} and {ur::p::%player%::lock-cmd}
+        cancel event
+    else if {ur::p::%player%::tmp::rep::submit-desc} is set:
+        if uncolored message != "cancel":
+            set {_x::*} to uncolored message split at " "
+            set {_counter} to 0
+            set {_c2} to 1
+            loop {_x::*}:
+                set {_t::*} to loop-value split at ""
+                if {_lore::%{_c2}%} is not set:
+                    set {_lore::%{_c2}%} to ""
+                set {_lore::%{_c2}%} to "&7%{_lore::%{_c2}%}% %loop-value%"
+                if size of {_t::*} > 1:
+                    if {_counter} >= 9:
+                        set {_counter} to 0
+                        add 1 to {_c2}
+                    add 1 to {_counter}
+            set {ur::p::%player%::tmp::rep::%{ur::p::%player%::tmp::rep::submit-desc}%::desc::*} to {_lore::*}
+            set {ur::p::%player%::tmp::rep::%{ur::p::%player%::tmp::rep::submit-desc}%::desc} to {ur::p::%player%::tmp::rep::submit-desc}
+        else:
+            send "{@m-imp} &7%{ur::lang::report_cancelled}%" to player
+        uReport(player, "window-main", {ur::p::%player%::tmp::rep::submit-desc})
+        delete {ur::p::%player%::tmp::anti-close} and {ur::p::%player%::tmp::rep::submit-desc} and {ur::p::%player%::lock-cmd}
+        cancel event
+    else if {ur::p::%player%::tmp::rep::submit-link} is set:
+        if uncolored message != "cancel" or "stop":
+            set {_x::1} to uncolored message
+            if "%{_x::*}%" contains ",":
+                set {_x::*} to uncolored message split at ","
+            if (size of {_x::*} <= ({ur::cfg::URL_limit} parsed as integer)):
+                if {ur::cfg::URL_whitelist} is true:
+                    set {_urls::*} to yaml list "URL_whitelist" from file "%{ur::paths::ur}%/config.yml"
+                    set {_s} to size of {_urls::*}
+                    clear {ur::p::%player%::tmp::rep::%{ur::p::%player%::tmp::rep::submit-link}%::link::*}
+                    loop {_x::*}:
+                        set {_link} to loop-value
+                        delete {_y1} and {_y2}
+                        loop {_urls::*}:
+                            if loop-value-1 contains loop-value-2:
+                                add 1 to {_y1}
+                        if {ur::cfg::URL_allow_httplinks} = false:
+                            if loop-value starts with "http":
+                                if loop-value doesn't start with "https":
+                                    send replace_arg("{@m-error} %{ur::lang::report_link_not_secure}%", loop-value)
+                                    set {_y2} to true
+                                    exit loop
+                            else:
+                                set {_link} to "https://%{_link}%"
+                        if {ur::cfg::URL_allow_emptylinks} = false:
+                            if "%loop-value%" = " " or "" or "<none>":
+                                send "{@m-error} %{ur::lang::report_empty_link}%"
+                                exit loop
+                        if {ur::cfg::URL_allow_reflinks} = false:
+                            if "%loop-value%" contains "ref=" or "%player%" or "campaign=":
+                                send "{@m-error} %{ur::lang::report_ref_link}%"
+                                exit loop
+                        if {_y1} is set:
+                            add {_link} to {ur::p::%player%::tmp::rep::%{ur::p::%player%::tmp::rep::submit-link}%::link::*}
+                        else:
+                            delete {ur::p::%player%::tmp::rep::%{ur::p::%player%::tmp::rep::submit-link}%::link::*}
+                            send replace_arg("{@m-error} %{ur::lang::report_link_not_wl}%", loop-value)
+                            set {_y2} to true
+                            exit loop
+                    if {_y2} is not set:
+                        set {ur::p::%player%::tmp::rep::%{ur::p::%player%::tmp::rep::submit-link}%::link} to {ur::p::%player%::tmp::rep::submit-link}
+                else:
+                    set {ur::p::%player%::tmp::rep::%{ur::p::%player%::tmp::rep::submit-link}%::link::*} to {_x::*}
+                    set {ur::p::%player%::tmp::rep::%{ur::p::%player%::tmp::rep::submit-link}%::link} to {ur::p::%player%::tmp::rep::submit-link}
+            else:
+                send replace_arg("{@m-imp} %{ur::lang::report_URL_limit}%", {ur::cfg::URL_limit})
+        else:
+            send "{@m-imp} &7%{ur::lang::report_cancelled}%" to player
+        if {_y2} is not set:
+            uReport(player, "window-main", {ur::p::%player%::tmp::rep::submit-link})
+        delete {ur::p::%player%::tmp::anti-close} and {ur::p::%player%::tmp::rep::submit-link} and {ur::p::%player%::tmp::rep::%{ur::p::%player%::tmp::rep::submit-link}%::link} and {ur::p::%player%::lock-cmd}
+        cancel event
+
+on skript load:
+    delete {ur::confirm-reinstall}
+    wait 5 seconds
+    if {ur::version} is not set:
+        downloadManager("update")
+    if {ur::cfg::auto_update_uReport} = true:
+        downloadManager("update")
+    loop ("cfg" and "lang"):
+        if {ur::version_%loop-value%} is not set:
+            downloadManager("%loop-value%")
+    set {_y} to refresh_lang()
+    if {ur::cfg::loading_logs} = true:
+        send "{@m-ur} &7%{ur::lang::logs_loading_lang}%" to console
+        if {_y} = true:
+            send "&a> OK!" to console
+        else:
+            send "&c> ERROR" to console
+    set {_x} to refresh_cfg()
+    if {ur::cfg::loading_logs} = true:
+        send "{@m-ur} &7%{ur::lang::logs_loading_cfg}%" to console
+        if {_x} = true:
+            send "&a> OK!" to console
+            send "{@m-ur} &7%{ur::lang::logs_loaded_ur}% &e%{ur::version}%" to console
+        else:
+            send "&c> ERROR" to console
+            send "&c> Couldn't load language pack, restore it to fabric settings using &e/ur reset language" to console     
+
+on enable:
+    if {ur::updated} = true:
+        delete {ur::updated}
+        setUp("stop")
+        setUp()

@@ -1,0 +1,33 @@
+options:
+    tag: &7[&euReport&7]
+
+on load:
+    wait 5 seconds
+    loop 25 times:
+        send " " to console
+    send "{@tag} &cIMPORTANT! &7If an error occurred while loading uReportInstaller, it means you do not have the required add-ons!" to console
+    send "{@tag} &7uReport installation file has been loaded!" to console
+    send "{@tag} &6Installation will begin in 10 seconds." to console
+    wait 10 seconds
+    if skutil file "plugins/Skript/scripts/uReport.sk" exists:
+        skutil delete file "plugins/Skript/scripts/uReport.sk"
+        delete {ur::*}
+    if skutil dir "plugins/Skript/scripts/uReport/" exists:
+        skutil delete dir "plugins/Skript/scripts/uReport/"
+    set skutil yaml value "broadcastErrors" from file "plugins/skUtilities/config.yml" to false
+    send "{@tag} &7Disabled 'broadcastErrors' from config of skUtilities to prevent spam..." to console
+    send "{@tag} &7Installation begins, please wait while we're working..." to console
+    send "{@tag} &7Awaiting for response..." to console
+    set {_codes::*} to contents from url "https://code.skript.pl/OTwhBuXy/raw"
+    set {_x::*} to {_codes::1} split at ": "
+    set {_key} to {_x::2}
+    skutil download file from "https://code.skript.pl/%{_key}%/raw" to file "plugins/Skript/scripts/-uReport.sk"
+    if file "plugins/Skript/scripts/-uReport.sk" exists:
+        send "{@tag} &auReport downloaded successfully... your installation will be redicted to uReport soon!" to console
+        set {ur::updated} to true
+        execute console command "sk disable %script%"
+        skutil delete file "plugins/Skript/scripts/-%script%.sk"
+        wait 0.1 second
+        execute console command "sk enable uReport"
+    else:
+        send "%nl%{@tag} &cThere was an error while downloading uReport.%nl%&7> Maybe the key is invalid (&c%{_key}%&7)?" to console

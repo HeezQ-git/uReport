@@ -1,0 +1,79 @@
+# if permission has more than one option (e.g. history, clear and remove)
+# you can use ".*" after to allow all options! e.g. "ur.history.*"
+cfg:
+    auto_update_uReport: true
+    update_notif: true
+    send_update_logs: true
+    loading_logs: true
+    URL_whitelist: true
+    URL_allow_reflinks: false
+    URL_allow_httplinks: false
+    URL_allow_emptylinks: false
+    URL_limit: "5"
+    sounds_all: true
+    sounds_status_change: true
+    sounds_player_change_desc: true
+    sounds_delrep: true
+    sounds_player_chat_add: true
+    sounds_player_chat_rem: true
+    sounds_update: true
+    passwd_required: false
+    rep_status_1: green stained glass pane
+    rep_status_2: red stained glass pane
+    rep_status_3: light blue stained glass pane
+    rep_status_4: lime stained glass pane
+    rep_status_5: barrier block
+    session_time: "3"
+    player_name_min_len: "4"
+    player_name_max_len: "16"
+    player_max_reports: "7"
+    player_max_chats: "3"
+    chat_max_user: "7"
+    id_length: "6"
+    passwd: "-"
+URL_whitelist:
+    - imgur.com
+    - i.imgur.com
+    - gyazo.com
+    - pasteboard.co
+    - prntscr.com
+    - onpaste.com
+    - paste.pics
+    - prnt.sc
+player_default_settings:
+    sounds_all: true
+    receive_notifs: true
+perm:
+    all: "*"
+    command: command
+    errors: errors
+    reload: reload
+    uninstall: uninstall
+    history: history
+    history_clear: history.clear
+    history_remove: history.remove
+    get_update_notif: notification
+    timezone: timezone
+    timezone_change: timezone.change
+    restore_lang: restore.language
+    restore_config: restore.config
+    config_reload: config.reload
+    config_disable: config.disable
+    config_enable: config.enable
+    config_toggle: config.toggle
+    config_set: config.set
+    config_chpass: config.changepasswd
+    config_status: config.status
+    faq: faq
+    addons: addons
+    update_check: update.check
+    update_download: update.download
+    update_config: update.config
+    update_lang: update.lang
+    lang_set: language.set
+    lang_reload: language.reload
+    lang_list: language.list
+    lang_download: language.download
+    new_report_notif: reports.notification
+    reports_manage: reports.manage
+    reports_menu: reports.menu
