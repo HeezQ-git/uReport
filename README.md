@@ -13,9 +13,9 @@ the project was created from scratch by me and is for public viewing.
 The project was intended to be even more extensive. **Currently you can find there:**
 - Possibility to install the script using the installer, which downloads the content itself and carries out the installation automatically.
 - Automatic downloading of updates
-- Config
 - Language manager - possibility to create own language pack
 - Logs and backups
+- Config
 - Possibility to reinstall a script from the menu level
 - Ability to uninstall a script from the menu level
 - Time zone change capability
